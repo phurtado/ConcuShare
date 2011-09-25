@@ -1,19 +1,19 @@
 #ifndef SERV_H
 #define SERV_H
 #include <iostream>
-#include <list>
 #include <map>
+#include "common.h"
 
 #include "fifo.h"
 
-#define BUFSIZE 100
-#define NOMBREFIFOSERVIDOR "fifo_lectura"
+//#define BUFSIZE 100
+//#define NOMBREFIFOSERVIDOR "fifo_lectura"
 
 
-typedef enum {ALTA=561,BAJA=562,LISTACOMP=563,
-						COMPARCH=564,DESCOMPARCH=565} TCOM;
-typedef std::list<std::string> ListaPaths;
-typedef long TPID;
+//typedef enum {ALTA=561,BAJA=562,LISTACOMP=563,
+//						COMPARCH=564,DESCOMPARCH=565} TCOM;
+//typedef std::list<std::string> ListaPaths;
+//typedef long TPID;
 
 class Servidor {
 	private:
@@ -69,7 +69,8 @@ class Servidor {
 		 TPID pidClienteDestino);
 		/* destructor del Servidor */
 		virtual ~Servidor();
-		
+
+        size_t obtenerTamanioLista();
 };
 
 #endif /* SERV_H */

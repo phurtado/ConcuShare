@@ -58,7 +58,7 @@ int Servidor::bajaCliente(TPID pidCliente) {
 int Servidor::getListaCompartidos(TPID pidCliente) {
 	cout << "Retornando lista para el pid " << pidCliente << endl;
 	size_t tamLista = obtenerTamanioLista();
-	char *lista
+	//char *lista ...TODO
 	
 	return 0;
 }

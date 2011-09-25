@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include "servidor.h"
+#include "common.h"
+#include "fifo.h"
 
 using namespace std;
 
