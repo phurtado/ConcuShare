@@ -16,6 +16,7 @@ void Servidor::escucharComandos() {
 		int res = this->fifoLectura->leer(buffer, BUFSIZE);
 		TCOM comando = parser.getComando();
 		TPID pidProceso = parser.getPid();
+
 		cout << "com = " << comando << ", proc = " <<pidProceso << endl;
 		switch (comando) {
 			case ALTA:
@@ -58,8 +59,6 @@ int Servidor::bajaCliente(TPID pidCliente) {
 
 int Servidor::getListaCompartidos(TPID pidCliente) {
 	cout << "Retornando lista para el pid " << pidCliente << endl;
-	
-	
 	
 	return 0;
 }

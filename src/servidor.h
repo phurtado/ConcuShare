@@ -3,7 +3,12 @@
 #include <iostream>
 #include <map>
 #include "common.h"
+
 #include "parsercomandos.h"
+
+#include "fifo.h"
+
+
 
 #include "fifo.h"
 
@@ -18,7 +23,7 @@ class Servidor {
 		
 		size_t getLongitudPath(char *buffer);
 		std::string getPathArchivo(char *buffer, size_t longitud);
-		//size_t obtenerTamanioLista();
+
 		
 	public:
 		/* Inicializa el servidor */
@@ -70,6 +75,8 @@ class Servidor {
 
 		/* destructor del Servidor */
 		virtual ~Servidor();
+
+        size_t obtenerTamanioLista();
 
 };
 
