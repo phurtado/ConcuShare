@@ -12,6 +12,7 @@ class ParserComandos {
         
         size_t obtenerTamanioLista(std::map<TPID, ListaPaths*> &mapa);
         char* serializarListaCliente(ListaPaths &lista, char * buffer);
+        char *hidratarLista(char *posicionActual, ListaPaths *lista);
     
     public:
 		/* inicializan el parser */

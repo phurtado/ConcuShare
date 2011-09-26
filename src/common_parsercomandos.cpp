@@ -36,14 +36,14 @@ char *getPath() {
 
 map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
 	map<TPID, ListaPaths*> *mapa = new map<TPID, ListaPaths*>();
-	size_t tamanioLista;
+	size_t tamanioLista, cantidadListas = 0;
 	TPID pidCliente;
 	char *posicionActual = this->buffer;
 	// recupero el tamanio total de la lista
 	memcpy((void *) & tamanioLista, (void *) posicionActual, sizeof(size_t));
 	posicionActual += sizeof(size_t);
 	
-	while(posicionActual < tamanioLista) {
+	while(cantidadListas++ < tamanioLista) {
 		// recupero el PID del cliente
 		memcpy((void *) & pidCliente, (void *) posicionActual, sizeof(TPID));
 		posicionActual += sizeof(TPID);
@@ -51,6 +51,7 @@ map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
 		ListaPaths *lista = new ListaPaths();
 		posicionActual = hidratarLista(posicionActual, lista);
 	}
+	return mapa;
 }
 
 
