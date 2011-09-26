@@ -3,6 +3,7 @@
 #include <list>
 #include <unistd.h>
 #include <sys/types.h>
+#include <iostream>
 
 #define BUFSIZE 100
 #define NOMBREFIFOSERVIDOR "fifo_lectura"

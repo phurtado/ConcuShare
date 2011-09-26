@@ -19,7 +19,8 @@ class Cliente{
         int dejarDeCompartirArchivo(std::string pathArchivo);
         std::map<TPID,ListaPaths*>* getCompartidos();
         int iniciarDescarga(std::string pathArchivo);
-}
+        int escribirMensajeAlServidor(TCOM tipo,std::string mensaje);
+};
 
 
 #endif
