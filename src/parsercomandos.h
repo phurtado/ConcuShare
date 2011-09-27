@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string.h>
+#include <stdlib.h>
 
 #include "common.h"
 
@@ -10,11 +11,13 @@ class ParserComandos {
     private:
         char *buffer;
         
-        size_t obtenerTamanioLista(std::map<TPID, ListaPaths*> &mapa);
+        
         char* serializarListaCliente(ListaPaths &lista, char * buffer);
         char *hidratarLista(char *posicionActual, ListaPaths *lista);
+        size_t obtenerTamanioLista(std::map<TPID, ListaPaths*> &mapa);
     
     public:
+    
 		/* inicializan el parser */
 		ParserComandos();
 		

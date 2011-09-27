@@ -35,52 +35,59 @@ char *getPath() {
 }
 
 map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
+	
 	map<TPID, ListaPaths*> *mapa = new map<TPID, ListaPaths*>();
-	size_t tamanioLista, cantidadListas = 0;
+	unsigned int tamanioLista;
 	TPID pidCliente;
 	char *posicionActual = this->buffer;
+	
 	// recupero el tamanio total de la lista
 	memcpy((void *) & tamanioLista, (void *) posicionActual, sizeof(size_t));
 	posicionActual += sizeof(size_t);
 	
-	while(cantidadListas++ < tamanioLista) {
+	while(posicionActual - this->buffer < tamanioLista) {
 		// recupero el PID del cliente
 		memcpy((void *) & pidCliente, (void *) posicionActual, sizeof(TPID));
 		posicionActual += sizeof(TPID);
 		
 		ListaPaths *lista = new ListaPaths();
 		posicionActual = hidratarLista(posicionActual, lista);
+		mapa->insert(pair< TPID, ListaPaths* >(pidCliente, lista));
 	}
 	return mapa;
 }
 
 
 char * ParserComandos::hidratarLista(char *posicion, ListaPaths *lista) {
-	size_t tamanio, nPathActual = 0;
+	size_t tamanio, tamPath, nPathActual = 0;
 	// recupero el tamanio de la lista de paths
 	memcpy((void *) & tamanio, (void *) posicion, sizeof(size_t));
 	posicion += sizeof(size_t);
 	
 	while(nPathActual++ < tamanio) {
 		// recupero el tamanio del path
-		memcpy((void *) & tamanio, (void *) posicion, sizeof(size_t));
+		
+		memcpy((void *) & tamPath, (void *) posicion, sizeof(size_t));
 		posicion += sizeof(size_t);
 		
 		char *path = NULL;
-		if(tamanio > 0)
-			path = new char(tamanio);
-		memcpy((void *) path, (void *) posicion, tamanio);
-		lista->push_back(string(path, tamanio));
+		if(tamPath > 0)
+			path = new char(tamPath);
+		memcpy((void *) path, (void *) posicion, tamPath);
+		posicion += tamPath;
+		lista->push_back(string(path, tamPath));
 	}
 	return posicion;
 }
 
 
 char *ParserComandos::serializarLista(map<TPID, ListaPaths*> &mapaCompartidos) {
-	size_t tamanioLista = obtenerTamanioLista(mapaCompartidos);
-	char *bufferLista = new char(tamanioLista), *posicionActual = bufferLista;
 	
 	map<TPID, ListaPaths*>::iterator itM = mapaCompartidos.begin();
+	size_t tamanioLista = obtenerTamanioLista(mapaCompartidos);
+	
+	char *bufferLista = (char *) calloc(tamanioLista, sizeof(char));
+	char *posicionActual = bufferLista;
 	
 	// copio el tamanio total de la lista
 	memcpy((void *) posicionActual, (void *) & tamanioLista, sizeof(size_t));
@@ -98,32 +105,30 @@ char *ParserComandos::serializarLista(map<TPID, ListaPaths*> &mapaCompartidos) {
 	return bufferLista;
 }
 
-char* ParserComandos::serializarListaCliente(ListaPaths &lista, char * buffer) {
+char* ParserComandos::serializarListaCliente(ListaPaths &lista, char * posicion) {
 	ListaPaths::iterator itL = lista.begin();
 	// copio el tamanio de la lista del cliente
 	size_t tamanio = lista.size();
-	memcpy((void *) buffer, (void *) & tamanio, sizeof(size_t));
-	buffer += sizeof(size_t);
-	// copio los tamanios de los paths y los paths
-	for(; itL != lista.end(); itL++) {
+	memcpy((void *) posicion, (void *) & tamanio, sizeof(size_t));
+	posicion += sizeof(size_t);
+	
+	for(; itL != lista.end(); itL++) {	
 		// copio el tamanio del path (numero de caracteres de la ruta del archivo)
-		tamanio = lista.size();
-		memcpy((void *) buffer, (void *) & tamanio, sizeof(size_t));
-		buffer += sizeof(size_t);
-		
+		size_t tamPath = itL->size();
+		memcpy((void *) posicion, (void *) & tamPath, sizeof(size_t));
+		posicion += sizeof(size_t);
 		// copio el path
-		memcpy((void *) buffer, (void *) itL->c_str(), itL->size());
-		buffer += itL->size();
+		memcpy((void *) posicion, (void *) itL->c_str(), tamPath);
+		posicion += tamPath;
 	}
-	return buffer;
+	return posicion;
 }
 
 
 size_t ParserComandos::obtenerTamanioLista(map<TPID, ListaPaths*> &mapa) {
-	size_t tamanio = 0;
 	// suma el PID para cada cliente y el tamanio de su lista
-	tamanio += 2 * sizeof(TPID) * mapa.size();
-	
+	size_t tamanio = sizeof(TPID) * mapa.size();
+	tamanio += sizeof(size_t) * mapa.size();
 	// suma el tamanio de la lista entera
 	tamanio += sizeof(size_t);
 	
