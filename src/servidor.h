@@ -15,7 +15,7 @@
 class Servidor {
 	private:
 		Fifo *fifoLectura;
-		std::list<Fifo> *fifosEscritura;
+		std::map<TPID, Fifo*> *fifosEscritura;
 		std::map<TPID, ListaPaths*> *mapaPaths;
 		bool sigueEscuchando;
 		
@@ -48,7 +48,7 @@ class Servidor {
 		 * pidCliente la lista de archivos compartidos
 		 * pidCliente: cliente solicitante de la lista
 		 */
-		int getListaCompartidos(TPID pidCliente);
+		int enviarListaCompartidosACliente(TPID pidCliente);
 
 		/* metodo para compartir un archivo
 		 * pathArchivo: string conteniendo el path del archivo a compartir
@@ -72,7 +72,7 @@ class Servidor {
 		 */
 		int transferirArchivo(std::string &pathArchivo, TPID pidClienteOrigen,
 		 TPID pidClienteDestino);
-
+		
 		/* destructor del Servidor */
 		virtual ~Servidor();
 

@@ -27,11 +27,26 @@ TPID ParserComandos::getPid() {
 }
 
 std::size_t ParserComandos::getTamanoStringPath() {
-	return 0;
+	size_t l;
+	char *destino = this->buffer + sizeof(TCOM) + sizeof(TPID);
+	memcpy((void *) l, (void *) destino , sizeof(size_t));
+	return l;
 }
 
-char *getPath() {
-	return NULL;
+string ParserComandos::getPath() {
+	size_t longitud = getTamanoStringPath();
+	char *pathArchivo = this->buffer + sizeof(TCOM) + sizeof(TPID) + sizeof(size_t);
+	string path(pathArchivo, longitud);
+	return path;
+}
+
+TPID ParserComandos::getPidDestino() {
+	TPID pidDestino;
+	size_t longitudPath = getTamanoStringPath();
+	char *pidDest = this->buffer + sizeof(TCOM) + sizeof(TPID) + sizeof(size_t) +
+						longitudPath;
+	memcpy((void *) &pidDestino, (void *) pidDest, sizeof(TPID));
+	return pidDestino;
 }
 
 map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
@@ -81,10 +96,10 @@ char * ParserComandos::hidratarLista(char *posicion, ListaPaths *lista) {
 }
 
 
-char *ParserComandos::serializarLista(map<TPID, ListaPaths*> &mapaCompartidos) {
+char *ParserComandos::serializarLista(map<TPID, ListaPaths*> &mapaCompartidos, size_t tam) {
 	
 	map<TPID, ListaPaths*>::iterator itM = mapaCompartidos.begin();
-	size_t tamanioLista = obtenerTamanioLista(mapaCompartidos);
+	size_t tamanioLista = (tam == 0) ? obtenerTamanioLista(mapaCompartidos) : tam;
 	
 	char *bufferLista = (char *) calloc(tamanioLista, sizeof(char));
 	char *posicionActual = bufferLista;

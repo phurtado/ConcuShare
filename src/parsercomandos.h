@@ -14,7 +14,7 @@ class ParserComandos {
         
         char* serializarListaCliente(ListaPaths &lista, char * buffer);
         char *hidratarLista(char *posicionActual, ListaPaths *lista);
-        size_t obtenerTamanioLista(std::map<TPID, ListaPaths*> &mapa);
+        
     
     public:
     
@@ -42,7 +42,8 @@ class ParserComandos {
 		 */
 		TPID getPid();
 		
-		// Comandos Compartir y descompartir archivo
+		// Comandos Compartir y descompartir archivo y solicitar
+		// transferencia de archvios
 		
 		/* Los siguientes son metodos validos para dichos comandos.
 		 */
@@ -52,8 +53,16 @@ class ParserComandos {
 		std::size_t getTamanoStringPath();
 		
 		/* metodo para obtener el path del archivo a compartir/descompartir
+		 * longitud: longitud del path
 		 */
-		char *getPath();
+		std::string getPath();
+		
+		
+		/* metodo que obtiene el pid destino de la solicitud de 
+		 * transferencia de un archivo.
+		 * retorna: PID destino.
+		 */
+		TPID getPidDestino();
 		
 		// Comando Pedir Lista de archivos
 		
@@ -63,9 +72,19 @@ class ParserComandos {
 		
 		/* metodo para serializar la lista de compartidos.
 		 * mapaCompartidos: mapa de archivos compartidos
+		 * tam: tamanio de la lista previamente calculado con el metodo 
+		 * obtenerTamanioLista. Por defecto 0, no se pasa el tamanio.
 		 * Retorna: un buffer con la lista serializada.
 		 */
-		char *serializarLista(std::map<TPID, ListaPaths*> &mapaCompartidos);
+		char *serializarLista(std::map<TPID, ListaPaths*> &mapaCompartidos, std::size_t tam = 0);
+		
+		/* metodo para obtener el tamanio del array de chars que contendra la
+		 * lista de archivos compartidos serializada
+		 * mapa: mapa con los paths de archivos compartidos.
+		 * retorna: el tamanio en chars.
+		 */
+		size_t obtenerTamanioLista(std::map<TPID, ListaPaths*> &mapa);
+		
 };
 
 
