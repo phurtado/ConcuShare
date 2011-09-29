@@ -5,11 +5,6 @@
 #include "common.h"
 
 #include "parsercomandos.h"
-
-#include "fifo.h"
-
-
-
 #include "fifo.h"
 
 class Servidor {
@@ -19,11 +14,11 @@ class Servidor {
 		std::map<TPID, ListaPaths*> *mapaPaths;
 		bool sigueEscuchando;
 		
-		char buffer[BUFSIZE];
+		char *buffer;
 		
 		size_t getLongitudPath(char *buffer);
 		std::string getPathArchivo(char *buffer, size_t longitud);
-
+		int leerComando(ParserComandos &parser);
 		
 	public:
 		/* Inicializa el servidor */
@@ -75,8 +70,12 @@ class Servidor {
 		
 		/* destructor del Servidor */
 		virtual ~Servidor();
-
-        size_t obtenerTamanioLista();
+		
+		/* setea el indicador de continuacion de escucha de comandos
+		 * del servidor
+		 * continua: boolean indicando si continua (true) o no (false)
+		 */  
+        void setContinua(bool continua);
 
 };
 

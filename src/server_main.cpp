@@ -1,28 +1,37 @@
 #include <iostream>
+#include <signal.h>
+
 #include "servidor.h"
 
 #include "parsercomandos.h"
 
 using namespace std;
 
-void mostrarElementos(map<TPID, ListaPaths* > *mapa) {
-	map<TPID, ListaPaths*>::iterator itM = mapa->begin();
-	ListaPaths::iterator itL;
-	for(; itM != mapa->end(); itM++) {
-		cout << "Elemento mapa: " << itM->first << endl;
-		for(itL = itM->second->begin(); itL != itM->second->end(); itL++) {
-			cout << "PID: " << itM->first << ", Ruta: " << *itL << endl;
-		}
-	}
+Servidor *s = NULL;
+
+void handler_SIGINT(int sig) {
+	s->setContinua(false);
+	delete s;
+}
+
+
+void registrarSignalTerm() {
+	struct sigaction sa;
+	sigemptyset(& sa.sa_mask);
+	sigaddset(& sa.sa_mask, SIGINT);
+	sa.sa_handler = handler_SIGINT;
+	
+	sigaction(SIGINT, &sa, NULL);
 }
 
 int main() {
 	cout << "lala main server" << endl;
 	
-	Servidor *s = new Servidor();
-	s->escucharComandos();
+	s = new Servidor();
 	
-	delete s;
+	registrarSignalTerm();
+	
+	s->escucharComandos();
 	
 	return 0;
 }

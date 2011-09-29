@@ -29,7 +29,7 @@ TPID ParserComandos::getPid() {
 std::size_t ParserComandos::getTamanoStringPath() {
 	size_t l;
 	char *destino = this->buffer + sizeof(TCOM) + sizeof(TPID);
-	memcpy((void *) l, (void *) destino , sizeof(size_t));
+	memcpy((void *) &l, (void *) destino , sizeof(size_t));
 	return l;
 }
 
@@ -158,4 +158,23 @@ size_t ParserComandos::obtenerTamanioLista(map<TPID, ListaPaths*> &mapa) {
 		}
 	}
 	return tamanio;
+}
+
+size_t ParserComandos::obtenerTamanioComando() {
+	TCOM comando = getComando();
+	switch (comando) {
+			case ALTA:
+			case BAJA:
+			case LISTACOMP:
+				return sizeof(TCOM) + sizeof(TPID);
+			case COMPARCH:
+			case DESCOMPARCH:
+				return sizeof(TCOM) + sizeof(TPID) + sizeof(size_t) + 
+					getTamanoStringPath();
+			case PEDIRARCH:
+				cout << "PEDIR ARCHIVOOO" << endl;
+				return sizeof(TCOM) + 2 * sizeof(TPID) + sizeof(size_t) + 
+					getTamanoStringPath();
+	}
+	return -1;
 }

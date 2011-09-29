@@ -85,6 +85,10 @@ class ParserComandos {
 		 */
 		size_t obtenerTamanioLista(std::map<TPID, ListaPaths*> &mapa);
 		
+		/* metodo para obtener el tamanio total del comando actual 
+		 * del buffer.
+		 */
+		 size_t obtenerTamanioComando();
 };
 
 

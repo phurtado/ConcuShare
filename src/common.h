@@ -8,7 +8,9 @@
 #include <string>
 #include <iostream>
 
-#define BUFSIZE 100
+#define BUFSIZE 22
+/* BUFSIZE MINIMO = sizeof(TCOM) + sizeof(TPID) + sizeof(size_t) */
+
 #define NOMBREFIFOSERVIDOR "fifo_lectura"
 
 typedef enum {ALTA=561,BAJA=562,LISTACOMP=563,

@@ -26,9 +26,11 @@ int Fifo :: leer (char *buffer, int buffSize ) {
         int resultado = read(this->fileDes ,(void*) buffer , buffSize);
         return resultado;
 }
+
 void Fifo :: cerrar () {
-        if(this->fileDes == -1)
-			return;
-        close(this->fileDes);
-        unlink(this->nombre);
+        if(this->fileDes != -1)
+			close(this->fileDes);
+				
+		unlink(this->nombre);
+			
 }

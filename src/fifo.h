@@ -4,6 +4,8 @@
 # include <string.h>
 # include <sys/stat.h>
 # include <fcntl.h>
+# include <stdio.h>
+ 
 class Fifo {
           private :
                      char nombre [255];

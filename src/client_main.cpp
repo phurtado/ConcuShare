@@ -8,18 +8,31 @@ using namespace std;
 int main() {
 	cout << "lala main cliente" << endl;
 	Fifo *fifo = new Fifo(NOMBREFIFOSERVIDOR);
-	char linea[BUFSIZE];
-	TCOM comando = ALTA;
-	TPID pid = 111;
+	char linea[2 * BUFSIZE];
+	TCOM comando = PEDIRARCH;
+	TPID pidO = 111, pidD = 112;
+	size_t tamP = 9;
+	string path = "lala45679";
+	char *pos = linea;
 	
-	for(size_t i = 0; i < sizeof(TCOM); i++)
-		*(linea + i) = *((char*) &comando + i);
-	for(size_t i = 0; i < sizeof(TPID); i++)
-		*(linea + sizeof(TCOM) + i) = *((char*) &pid + i);
+	memcpy((void *) pos, (void *) &comando, sizeof(TCOM));
+	pos += sizeof(TCOM);
+	memcpy((void *) pos, (void *) &pidO, sizeof(TPID));
+	pos += sizeof(TPID);
+	memcpy((void *) pos, (void *) &tamP, sizeof(size_t));
+	pos += sizeof(size_t);
+	memcpy((void *) pos, (void *) path.c_str(), path.size());
+	pos += path.size();
+	memcpy((void *) pos, (void *) &pidD, sizeof(TPID));
+	pos += sizeof(TPID);
 	
-	cout << "Size: " << sizeof(TCOM) + sizeof(TPID) << endl;
-	fifo->escribir(linea, sizeof(TCOM) + sizeof(TPID));
+	cout << "Tam Comando: " << pos - linea << endl;
 	
+	fifo->escribir(linea, pos - linea);
+	
+	sleep(10);
+	
+	fifo->cerrar();
 	
 	return 0;
 }

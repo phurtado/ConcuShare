@@ -45,7 +45,7 @@ int Cliente::iniciarDescarga(string pathArchivo){
 int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
     size_t longMensaje = mensaje.length();
     char* msj = new char[sizeof(TCOM) + sizeof(TPID) + longMensaje];
-    strlen(msj);
+    //strlen(msj);
     TPID pid = getpid();
     memcpy(msj,&tipo,sizeof(TCOM));
     memcpy(msj+sizeof(TCOM),&pid,sizeof(TPID));

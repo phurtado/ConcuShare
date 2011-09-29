@@ -7,18 +7,46 @@ Servidor::Servidor() {
 	this->fifosEscritura = new map< TPID, Fifo*>();
 	this->mapaPaths = new map<TPID, ListaPaths*>();
 	this->sigueEscuchando = true;
-	
+	this->buffer = (char *) calloc(BUFSIZE, sizeof(char));
+}
+
+void Servidor::setContinua(bool continua) {
+	this->sigueEscuchando = continua;
+}
+
+int Servidor::leerComando(ParserComandos &parser) {
+	int res = this->fifoLectura->leer(this->buffer, BUFSIZE), i = 2;
+	if(res <= 0) // si es 0 es porque el cliente se cerro
+		return -1;
+	if(! this->sigueEscuchando)
+		return 0;
+	int tam = parser.obtenerTamanioComando();
+	while(res < tam) {
+		char *bufferNuevo = (char *) calloc(i * BUFSIZE, sizeof(char));
+		memcpy((void *)bufferNuevo, buffer, (i - 1) * BUFSIZE);
+		free(this->buffer);
+		this->buffer = bufferNuevo;
+		int resProv = this->fifoLectura->leer(this->buffer + (i - 1) * BUFSIZE, BUFSIZE);
+		if(resProv < 0)
+			return -1;
+		res += resProv;
+		i++;
+		cout << "Leido resP = " << resProv << ", res = " << res << "tam = " << tam << endl;
+		parser.setBuffer(this->buffer);
+	}
+	return 0;
 }
 
 void Servidor::escucharComandos() {
-	ParserComandos parser(buffer);
+	ParserComandos parser(this->buffer);
 	string pathArchivo;
 	while(this->sigueEscuchando) {
-		int res = this->fifoLectura->leer(buffer, BUFSIZE);
+		int res = leerComando(parser);
+		if(res != 0)
+			return;
 		TCOM comando = parser.getComando();
 		TPID pidProceso = parser.getPid();
 		
-		cout << "com = " << comando << ", proc = " <<pidProceso << endl;
 		switch (comando) {
 			case ALTA:
 				altaCliente(pidProceso);
@@ -33,6 +61,7 @@ void Servidor::escucharComandos() {
 			case DESCOMPARCH:
 				pathArchivo = parser.getPath();
 				descompartirArchivo(pathArchivo, pidProceso);
+				break;
 			case LISTACOMP:
 				enviarListaCompartidosACliente(pidProceso);
 				break;
@@ -40,6 +69,9 @@ void Servidor::escucharComandos() {
 				pathArchivo = parser.getPath();
 				TPID pidDestino = parser.getPidDestino();
 				transferirArchivo(pathArchivo, pidProceso, pidDestino);
+				cout << "transferencia desde " << pidProceso << " hasta " << pidDestino << 
+				" el archivo " << pathArchivo << " de size " << 
+				parser.getTamanoStringPath() << endl;
 		}
 	}
 }
@@ -106,6 +138,7 @@ int Servidor::descompartirArchivo(string &pathArchivo, TPID pidCliente) {
 
 int Servidor::transferirArchivo(string &pathArchivo, TPID pidClienteOrigen,
 		 TPID pidClienteDestino) {
+		
 			 return 0;
 		 }
 
@@ -122,5 +155,6 @@ Servidor::~Servidor() {
 	delete this->fifoLectura;
 	delete this->fifosEscritura;
 	delete this->mapaPaths;
+	free(this->buffer);
 }
 		
