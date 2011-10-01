@@ -77,6 +77,7 @@ endif
 
 # Si no especifica archivos, tomo todos.
 fuentes_client ?= $(wildcard client*.$(extension))
+fuentes_transf ?= $(wildcard transf*.$(extension))
 fuentes_server ?= $(wildcard server*.$(extension))
 fuentes_common ?= $(wildcard common*.$(extension))
 
@@ -86,11 +87,12 @@ fuentes_common ?= $(wildcard common*.$(extension))
 
 .PHONY: all clean
 
-all: client server
+all: client server transf
 
 o_common_files = $(patsubst %.$(extension),%.o,$(fuentes_common))
 o_client_files = $(patsubst %.$(extension),%.o,$(fuentes_client)) $(o_common_files)
 o_server_files = $(patsubst %.$(extension),%.o,$(fuentes_server)) $(o_common_files)
+o_transf_files = $(patsubst %.$(extension),%.o,$(fuentes_transf)) $(o_common_files)
 
 %.deps: %.$(extension)
 	@set -e; rm -f $@; \
@@ -116,6 +118,14 @@ server: $(o_server_files)
 	fi >&2
 	$(LD) $(LDFLAGS) $(o_server_files) $(LOADLIBES) $(LDLIBS) -o server $(LDADD)
 
+transf: $(o_transf_files)
+	@if [ -z "$(o_transf_files)" ]; \
+	then \
+		echo "No hay archivos de entrada para el transferidor (archivos transf*.$(extension))."; \
+		false; \
+	fi >&2
+	$(LD) $(LDFLAGS) $(o_transf_files) $(LOADLIBES) $(LDLIBS) -o transf $(LDADD)
+
 clean:
-	@$(RM) -fv *.o client server
+	@$(RM) -fv *.o client server transf
 

@@ -12,13 +12,13 @@ Servidor *s = NULL;
 void handler_SIGINT(int sig) {
 	s->setContinua(false);
 	delete s;
+	s = NULL;
 }
 
 
 void registrarSignalTerm() {
 	struct sigaction sa;
 	sigemptyset(& sa.sa_mask);
-	sigaddset(& sa.sa_mask, SIGINT);
 	sa.sa_handler = handler_SIGINT;
 	
 	sigaction(SIGINT, &sa, NULL);
@@ -32,6 +32,9 @@ int main() {
 	registrarSignalTerm();
 	
 	s->escucharComandos();
+	
+	if(s)
+		delete s;
 	
 	return 0;
 }

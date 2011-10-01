@@ -12,6 +12,7 @@ class Servidor {
 		Fifo *fifoLectura;
 		std::map<TPID, Fifo*> *fifosEscritura;
 		std::map<TPID, ListaPaths*> *mapaPaths;
+		std::list<TPID> *listaHijos;
 		bool sigueEscuchando;
 		
 		char *buffer;
@@ -62,11 +63,11 @@ class Servidor {
 		 * el serviror notidicara al cliente transmisor y este 
 		 * se encargara de la transferencia
 		 * pathArchivo: path del archivo requerido
-		 * pidClienteOrigen: PID del cliente que solicita el archivo
+		 * pathDestino: path del archivo destino de la transferencia
 		 * pidClienteDestino: PID cliente que transmitira el archivo
 		 */
-		int transferirArchivo(std::string &pathArchivo, TPID pidClienteOrigen,
-		 TPID pidClienteDestino);
+		int transferirArchivo(std::string &pathArchivo, std::string &pathDestino, 
+				TPID pidClienteDestino, TPID pidClienteDuenioArchivo);
 		
 		/* destructor del Servidor */
 		virtual ~Servidor();

@@ -6,6 +6,7 @@ Servidor::Servidor() {
 	this->fifoLectura = new Fifo(NOMBREFIFOSERVIDOR);
 	this->fifosEscritura = new map< TPID, Fifo*>();
 	this->mapaPaths = new map<TPID, ListaPaths*>();
+	this->listaHijos = new list< TPID >();
 	this->sigueEscuchando = true;
 	this->buffer = (char *) calloc(BUFSIZE, sizeof(char));
 }
@@ -18,8 +19,6 @@ int Servidor::leerComando(ParserComandos &parser) {
 	int res = this->fifoLectura->leer(this->buffer, BUFSIZE), i = 2;
 	if(res <= 0) // si es 0 es porque el cliente se cerro
 		return -1;
-	if(! this->sigueEscuchando)
-		return 0;
 	int tam = parser.obtenerTamanioComando();
 	while(res < tam) {
 		char *bufferNuevo = (char *) calloc(i * BUFSIZE, sizeof(char));
@@ -41,8 +40,7 @@ void Servidor::escucharComandos() {
 	ParserComandos parser(this->buffer);
 	string pathArchivo;
 	while(this->sigueEscuchando) {
-		int res = leerComando(parser);
-		if(res != 0)
+		if(leerComando(parser))
 			return;
 		TCOM comando = parser.getComando();
 		TPID pidProceso = parser.getPid();
@@ -66,12 +64,15 @@ void Servidor::escucharComandos() {
 				enviarListaCompartidosACliente(pidProceso);
 				break;
 			case PEDIRARCH:
-				pathArchivo = parser.getPath();
-				TPID pidDestino = parser.getPidDestino();
-				transferirArchivo(pathArchivo, pidProceso, pidDestino);
-				cout << "transferencia desde " << pidProceso << " hasta " << pidDestino << 
+				pathArchivo = parser.getPathArchivoSolicitado();
+				string pathDestino = parser.getPathDestino();
+				TPID pidClienteDuenio = parser.getPidClienteDuenioArchivo();
+				transferirArchivo(pathArchivo, pathDestino, pidProceso, pidClienteDuenio);
+				cout << "transferencia desde " << pidClienteDuenio << 
+				" hasta " << pidProceso << 
 				" el archivo " << pathArchivo << " de size " << 
-				parser.getTamanoStringPath() << endl;
+				parser.getTamanoStringPath() << " al archivo " << 
+				pathDestino << " de size " << parser.getTamanioStringPathDestino() << endl;
 		}
 	}
 }
@@ -136,11 +137,17 @@ int Servidor::descompartirArchivo(string &pathArchivo, TPID pidCliente) {
 	return -1;
 }
 
-int Servidor::transferirArchivo(string &pathArchivo, TPID pidClienteOrigen,
-		 TPID pidClienteDestino) {
-		
-			 return 0;
-		 }
+int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino, 
+				TPID pidClienteDestino, TPID pidClienteDuenioArchivo) {
+	
+	TPID pid = fork();
+	
+	if(pid == 0) { // es el hijo
+		execl("./transf", "transf", pathArchivo.c_str(), pathDestino.c_str(), 0);
+	}
+	
+	return 0;
+}
 
 Servidor::~Servidor() {
 	this->fifoLectura->cerrar();
@@ -152,9 +159,14 @@ Servidor::~Servidor() {
 	for(; itM != this->mapaPaths->end(); itM++)
 		delete itM->second;
 	
+	list<TPID>::iterator itP = this->listaHijos->begin();
+	for(; itP != this->listaHijos->end(); itP++)
+		waitpid(*itP, NULL, 0);
+	
 	delete this->fifoLectura;
 	delete this->fifosEscritura;
 	delete this->mapaPaths;
+	delete this->listaHijos;
 	free(this->buffer);
 }
 		

@@ -18,6 +18,7 @@ int Fifo :: escribir ( char *dato , int datoSize ) {
         int resultado = write (this->fileDes ,(const void*) dato, datoSize);
         return resultado;
 }
+
 int Fifo :: leer (char *buffer, int buffSize ) {
         // se abre el file descriptor para lectura
         if (this->fileDes == -1 )
@@ -30,7 +31,6 @@ int Fifo :: leer (char *buffer, int buffSize ) {
 void Fifo :: cerrar () {
         if(this->fileDes != -1)
 			close(this->fileDes);
-				
+		
 		unlink(this->nombre);
-			
 }

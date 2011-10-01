@@ -40,14 +40,37 @@ string ParserComandos::getPath() {
 	return path;
 }
 
-TPID ParserComandos::getPidDestino() {
-	TPID pidDestino;
+string ParserComandos::getPathDestino() {
 	size_t longitudPath = getTamanoStringPath();
-	char *pidDest = this->buffer + sizeof(TCOM) + sizeof(TPID) + sizeof(size_t) +
-						longitudPath;
-	memcpy((void *) &pidDestino, (void *) pidDest, sizeof(TPID));
-	return pidDestino;
+	size_t longitudPathDestino = getTamanioStringPathDestino();
+	char *pathDestino = this->buffer + sizeof(TCOM) + 2 * sizeof(TPID) + 
+			2 * sizeof(size_t) + longitudPath;
+	return string(pathDestino, longitudPathDestino);
 }
+
+size_t ParserComandos::getTamanioStringPathDestino() {
+	size_t longitud;
+	char *destino = this->buffer + sizeof(TCOM) + sizeof(TPID) + 
+			sizeof(size_t);
+	memcpy((void *) &longitud, (void *) destino, sizeof(size_t));
+	return longitud;
+}
+
+TPID ParserComandos::getPidClienteDuenioArchivo() {
+	char *pidCliente = this->buffer + sizeof(TCOM) + sizeof(TPID) + 
+			2 * sizeof(size_t);
+	size_t pidClienteSizeT;
+	memcpy((void *) &pidClienteSizeT, (void *) pidCliente, sizeof(TPID));
+	return pidClienteSizeT;
+}
+
+std::string ParserComandos::getPathArchivoSolicitado() {
+	char *path = this->buffer + sizeof(TCOM) + 2 * sizeof(TPID) + 
+			2 * sizeof(size_t);
+	size_t longitud = getTamanoStringPath();
+	return string(path, longitud);
+}
+
 
 map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
 	
@@ -173,8 +196,8 @@ size_t ParserComandos::obtenerTamanioComando() {
 					getTamanoStringPath();
 			case PEDIRARCH:
 				cout << "PEDIR ARCHIVOOO" << endl;
-				return sizeof(TCOM) + 2 * sizeof(TPID) + sizeof(size_t) + 
-					getTamanoStringPath();
+				return sizeof(TCOM) + 2 * sizeof(TPID) + 2 * sizeof(size_t) + 
+					getTamanoStringPath() + getTamanioStringPathDestino();
 	}
 	return -1;
 }

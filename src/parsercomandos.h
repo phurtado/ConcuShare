@@ -52,17 +52,40 @@ class ParserComandos {
 		 */
 		std::size_t getTamanoStringPath();
 		
-		/* metodo para obtener el path del archivo a compartir/descompartir
+		/* metodo para obtener el path del archivo a compartir/descompartir o
+		 * el path solicitado en un comando de solicitud de archivo
 		 * longitud: longitud del path
 		 */
 		std::string getPath();
 		
+			
+		// Comando solicitar archivo compartido
 		
-		/* metodo que obtiene el pid destino de la solicitud de 
-		 * transferencia de un archivo.
-		 * retorna: PID destino.
+		/* Los siguientes metodos son solo para el comando mencionado */
+		
+		/* metodo para obtener el tamanio del path de destino de un comando
+		 * de solicitud de transferencia de archivo
+		 * retorna: el tamanio mencionado
 		 */
-		TPID getPidDestino();
+		std::size_t getTamanioStringPathDestino();
+		
+		/* metodo que obtiene el path destino de la solicitud de 
+		 * transferencia de un archivo.
+		 * retorna: path destino.
+		 */
+		std::string getPathDestino();
+		
+		/* metodo para recuperar el pid del cliente que esta compartiendo
+		 * el archivo.
+		 * retorna: pid del cliente duenio del archivo.
+		 */
+		TPID getPidClienteDuenioArchivo();
+		
+		/* metodo que obtiene el path del archivo pedido
+		 * Retorna: string con path.
+		 */
+		std::string getPathArchivoSolicitado();
+		
 		
 		// Comando Pedir Lista de archivos
 		

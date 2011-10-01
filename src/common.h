@@ -3,13 +3,13 @@
 #include <list>
 #include <unistd.h>
 #include <sys/types.h>
+#include <stdlib.h>
 #include <iostream>
-
 #include <string>
-#include <iostream>
+#include <sys/wait.h>
 
-#define BUFSIZE 22
-/* BUFSIZE MINIMO = sizeof(TCOM) + sizeof(TPID) + sizeof(size_t) */
+#define BUFSIZE 24
+/* BUFSIZE MINIMO = sizeof(TCOM) + sizeof(TPID) + 2 * sizeof(size_t) */
 
 #define NOMBREFIFOSERVIDOR "fifo_lectura"
 
