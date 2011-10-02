@@ -1,0 +1,11 @@
+Welcome to ConcuShare
+                  
+Ingrese la tarea a realizar:
+                  
+1. Conectarse al Servidor.
+2. Desconectarse del Servidor.
+3. Compartir archivos.
+4. Descompartir archivos.
+5. Descargar archivos.
+6. Obtener lista de archivos compartidos.
+7. Salir de la aplicación.
