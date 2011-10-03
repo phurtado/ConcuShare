@@ -2,12 +2,60 @@
 
 #include "common.h"
 #include "fifo.h"
+#include "Cliente.h"
 
 using namespace std;
 
 int main() {
-	cout << "lala main cliente" << endl;
+	int opcion = 1;
+	char buffer[1000];
+	Cliente cliente;
+
+	while(1) {
+		// Imprimo el menú del programa
+		FILE* fd = fopen("MenuCliente.txt", "r");
+		do {
+			fscanf(fd,"%[^\n]\n", buffer);
+			cout << buffer << endl;
+		} while(!feof(fd));
+		fclose(fd);
+
+		cout << endl << "Número de opción: ";
+		scanf("%s", buffer);
+		opcion = atoi(buffer);
+
+		switch(opcion) {
+		case 1:
+			cliente.conectarAlServidor();
+			break;
+		case 2:
+			cliente.desconectar();
+			break;
+		case 3:
+			// OJO QUE PUEDEN SER VARIOS A LA VEZ
+			//cliente.compartirArchivo();
+			break;
+		case 4:
+			// IDEM CASO 3
+			//cliente.dejarDeCompartirArchivo();
+			break;
+		case 5:
+			break;
+		case 6:
+			break;
+		case 7:
+			return 0;
+			break;
+		default:
+			cout << "Ingrese una opción válida" << endl;
+			break;
+			}
+	}
+
+
+	/*cout << "lala main cliente" << endl;
 	Fifo *fifo = new Fifo(NOMBREFIFOSERVIDOR);
+	Semaforo semaforo((char *) NOMBREFIFOSERVIDOR, 0);
 	char linea[2 * BUFSIZE];
 	TCOM comando = PEDIRARCH;
 	TPID pidO = 111, pidD = 112;
@@ -33,12 +81,11 @@ int main() {
 	
 	
 	cout << "Tam Comando: " << pos - linea << endl;
-	
+	// Incremento el semáforo al escribir
+	semaforo.v();	
 	fifo->escribir(linea, pos - linea);
-	
-	//sleep(10);
-	
 	fifo->cerrar();
+	cout << "Terminé de escribir" << endl;*/
 	
 	return 0;
 }

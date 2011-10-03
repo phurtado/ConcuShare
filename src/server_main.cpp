@@ -1,8 +1,6 @@
 #include <iostream>
 #include <signal.h>
-
 #include "servidor.h"
-
 #include "parsercomandos.h"
 
 using namespace std;
@@ -15,6 +13,11 @@ void handler_SIGINT(int sig) {
 	s = NULL;
 }
 
+void handler_SIGTERM(int sig) {
+	cout << "Terminé con SIGINT" << endl;
+	// cout << "Ni en pedo paso esto..." << endl;
+}
+
 
 void registrarSignalTerm() {
 	struct sigaction sa;
@@ -24,15 +27,19 @@ void registrarSignalTerm() {
 	sigaction(SIGINT, &sa, NULL);
 }
 
+void registrarSignalTerm2() {
+	struct sigaction sa;
+	sigemptyset(& sa.sa_mask);
+	sa.sa_handler = handler_SIGTERM;
+	
+	sigaction(SIGTERM, &sa, NULL);
+}
+
 int main() {
-	cout << "lala main server" << endl;
-	
+	cout << "Servidor escuchando peticiones de clientes..." << endl;
 	s = new Servidor();
-	
 	registrarSignalTerm();
-	
 	s->escucharComandos();
-	
 	if(s)
 		delete s;
 	

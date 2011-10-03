@@ -4,11 +4,14 @@
 #include <map>
 #include "common.h"
 #include "fifo.h"
+#include "Semaforo.h"
 
 class Cliente{
     private:
         Fifo *fifoEscritura;
         Fifo *fifoLectura;
+				Semaforo* semEscritura;
+				bool estaConectado;
         
     public:
         Cliente();

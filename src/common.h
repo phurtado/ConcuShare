@@ -18,4 +18,10 @@ typedef enum {ALTA=561,BAJA=562,LISTACOMP=563,
 typedef std::list<std::string> ListaPaths;
 typedef pid_t TPID;
 
+// Respuestas del servidor al cliente
+#define ALTAOK "0\0"
+#define ALTAWRONG "-1\0"
+#define BAJAOK "0\0"
+#define BAJAWRONG "-1\0"
+
 #endif

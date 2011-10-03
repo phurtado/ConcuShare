@@ -3,13 +3,16 @@
 #include <iostream>
 #include <map>
 #include "common.h"
-
+#include "Semaforo.h"
 #include "parsercomandos.h"
 #include "fifo.h"
+#include <sstream>
+using namespace std;
 
 class Servidor {
 	private:
 		Fifo *fifoLectura;
+		Semaforo* semLectura;
 		std::map<TPID, Fifo*> *fifosEscritura;
 		std::map<TPID, ListaPaths*> *mapaPaths;
 		std::list<TPID> *listaHijos;
