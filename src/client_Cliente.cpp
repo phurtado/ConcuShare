@@ -4,9 +4,8 @@
 using namespace std;
 
 Cliente::Cliente(){
-    stringstream ss;
-    ss << "fifo" << getpid();
-    this->fifoLectura = new Fifo(ss.str().c_str());
+    
+    this->fifoLectura = NULL;
     this->fifoEscritura = new Fifo(NOMBREFIFOSERVIDOR);
     this->semEscritura = new Semaforo( (char*) NOMBREFIFOSERVIDOR, 0);
 		this->estaConectado = false;
@@ -15,17 +14,21 @@ Cliente::Cliente(){
 Cliente::~Cliente(){
     // this->fifoEscritura->cerrar();
     // this->fifoLectura->cerrar();
-    delete this->fifoLectura;
+    if(this->fifoLectura)
+		delete this->fifoLectura;
     delete this->fifoEscritura;
-		delete this->semEscritura;
+	delete this->semEscritura;
 }
 
 void Cliente::conectarAlServidor(){
+    stringstream ss;
+    ss << "fifo" << getpid();
+    this->fifoLectura = new Fifo(ss.str().c_str());
     this->escribirMensajeAlServidor(ALTA, "");
     char buffer[100];
-    int bytesLeidos = this->fifoLectura->leer(buffer, strlen(buffer));
+    int bytesLeidos = this->fifoLectura->leer(buffer, 100);
 		buffer[bytesLeidos] = '\0';
-
+	
     if(strcmp(buffer,ALTAOK) == 0) {
     	cout << "Conexión realizada con éxito" << endl;
 			this->estaConectado = true;
@@ -36,10 +39,19 @@ void Cliente::conectarAlServidor(){
 }
 
 void Cliente::desconectar() {
+	char buffer[100];
 	if(this->estaConectado == true) {
 		this->estaConectado = false;
 		this->escribirMensajeAlServidor(BAJA, "");
-		cout << "Se ha desconectado con éxito" << endl; 
+		int bytesLeidos = this->fifoLectura->leer(buffer, 100);
+		buffer[bytesLeidos] = 0;
+		if(strcmp(buffer,BAJAOK) == 0) {
+			cout << "Desconexión realizada con éxito" << endl;
+			this->estaConectado = false;
+			this->fifoLectura->cerrar();
+			delete this->fifoLectura;
+			this->fifoLectura = NULL;
+		}
 	}
 	else {
 		cout << "No se encuentra conectado al servidor" << endl;
@@ -74,7 +86,7 @@ int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
     memcpy(msj + sizeof(TCOM), &pid, sizeof(TPID));
     memcpy(msj + sizeof(TCOM) + sizeof(TPID), mensaje.c_str(), longMensaje);
     cout << "VOY A ESCRIBIR " << pid << " " << tipo << " " << mensaje << endl;
-
+	
     // Incremento al semáforo para desbloquear al fifo del servidor
     this->semEscritura->v();
 		cout << "Antes de Escribir??" << endl;

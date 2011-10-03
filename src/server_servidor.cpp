@@ -17,13 +17,16 @@ void Servidor::setContinua(bool continua) {
 int Servidor::leerComando(ParserComandos &parser) {
 	// Decremento el semáforo para que el fifo se bloquee hasta que
 	// algún cliente le escriba algo
-	this->semLectura->p();
-	int res = this->fifoLectura->leer(this->buffer, BUFSIZE); 
+	cout << "Semaforo" << endl;
+	if(this->semLectura->p())
+		cout << "Error en p" << endl;
+	cout << "A leer" << endl;
+	int res = this->fifoLectura->leer(this->buffer, BUFSIZE);
 	int i = 2;
 
 	if(res <= 0) // si es 0 es porque el cliente se cerro
 		return -1;
-
+	
 	int tam = parser.obtenerTamanioComando();
 	while(res < tam) {
 		char *bufferNuevo = (char *) calloc(i * BUFSIZE, sizeof(char));
@@ -38,6 +41,7 @@ int Servidor::leerComando(ParserComandos &parser) {
 		cout << "Leido resP = " << resProv << ", res = " << res << "tam = " << tam << endl;
 		parser.setBuffer(this->buffer);
 	}
+	cout << "Caracteres leidos: " << res << endl;
 	return 0;
 }
 
@@ -85,7 +89,7 @@ void Servidor::escucharComandos() {
 int Servidor::altaCliente(TPID pidCliente) {
 	cout << "Alta cliente pid " << pidCliente << endl;
 	map< TPID, ListaPaths* >::iterator itM = this->mapaPaths->find(pidCliente);
-
+	
 	if(itM != this->mapaPaths->end()) {
 		// Lo encontro, le envió al cliente un -1 indicandole que ya está conectado.
 		(*this->fifosEscritura)[pidCliente]->escribir((char*) ALTAWRONG, strlen(ALTAWRONG));
@@ -99,7 +103,6 @@ int Servidor::altaCliente(TPID pidCliente) {
 	(*this->fifosEscritura)[pidCliente] = new Fifo(ss.str().c_str());
 	(*this->fifosEscritura)[pidCliente]->escribir((char*) ALTAOK, strlen(ALTAOK));
 	(*this->mapaPaths)[pidCliente] = new ListaPaths();
-	
 	return 0;
 }
 
@@ -112,7 +115,7 @@ int Servidor::bajaCliente(TPID pidCliente) {
 		this->mapaPaths->erase(itM);
 		(*this->fifosEscritura)[pidCliente]->escribir((char*) BAJAOK, strlen(BAJAOK));
 		// Cierro la fifo luego de mandar el mensaje
-		(*this->fifosEscritura)[pidCliente]->cerrar();
+		//(*this->fifosEscritura)[pidCliente]->cerrar();
 		delete (*this->fifosEscritura)[pidCliente];
 		return 0;
 	}

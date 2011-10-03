@@ -10,7 +10,7 @@ class Semaforo {
 private:
 	int id;
 	int valorInicial;
-
+	
 	int inicializar ();
 
 public:
@@ -18,6 +18,7 @@ public:
 	virtual ~Semaforo();
 	int p (); // decrementa
 	int v (); // incrementa
+	int getValor();
 	void eliminar ();
 };
 
