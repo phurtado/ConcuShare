@@ -2,11 +2,14 @@
 #define SERV_H
 #include <iostream>
 #include <map>
+#include <sstream>
+#include <algorithm>
+
 #include "common.h"
 #include "Semaforo.h"
 #include "parsercomandos.h"
 #include "fifo.h"
-#include <sstream>
+
 using namespace std;
 
 class Servidor {
@@ -23,6 +26,7 @@ class Servidor {
 		size_t getLongitudPath(char *buffer);
 		std::string getPathArchivo(char *buffer, size_t longitud);
 		int leerComando(ParserComandos &parser);
+		int archivoCompartidoActualmente(std::string &pathArchivo);
 		
 	public:
 		/* Inicializa el servidor */

@@ -71,6 +71,45 @@ std::string ParserComandos::getPathArchivoSolicitado() {
 	return string(path, longitud);
 }
 
+char* ParserComandos::armarCompDescomp(TCOM comando, TPID pid, std::string &path) {
+	char *comandoSerializado = new char[sizeof(TPID) + sizeof(TCOM) + 
+								sizeof(size_t) + path.size()];
+	size_t longPath = path.size();
+	char *posicion = comandoSerializado;
+	memcpy((void *)posicion, (void *) &comando, sizeof(TCOM));
+	posicion += sizeof(TCOM);
+	memcpy((void *)posicion, (void *) &pid, sizeof(TPID));
+	posicion += sizeof(TPID);
+	memcpy((void *)posicion, (void *) &longPath, sizeof(size_t));
+	posicion += sizeof(size_t);
+	memcpy((void *)posicion, (void *) path.c_str(), longPath);
+	return comandoSerializado;
+}
+
+char *armarSolicitarTransf(TCOM comando, TPID pidSolicitante, TPID pidDuenio, 
+							std::string &pathArchivo, std::string &pathDestino) {
+	size_t tamPathArch = pathArchivo.size();
+	size_t tamPathDest = pathDestino.size();
+	char *comandoSerializado = new char[2 * sizeof(TPID) + sizeof(TCOM) + 
+								2 * sizeof(size_t) + tamPathArch + 
+								tamPathDest];
+	char *pos = comandoSerializado;
+	
+	memcpy((void *) pos, (void *) &comando, sizeof(TCOM));
+	pos += sizeof(TCOM);
+	memcpy((void *) pos, (void *) &pidSolicitante, sizeof(TPID));
+	pos += sizeof(TPID);
+	memcpy((void *) pos, (void *) &tamPathArch, sizeof(size_t));
+	pos += sizeof(size_t);
+	memcpy((void *) pos, (void *) &tamPathDest, sizeof(size_t));
+	pos += sizeof(size_t);
+	memcpy((void *) pos, (void *) &pidDuenio, sizeof(TPID));
+	pos += sizeof(TPID);
+	memcpy((void *) pos, (void *) pathArchivo.c_str(), tamPathArch);
+	pos += tamPathArch;
+	memcpy((void *) pos, (void *) pathDestino.c_str(), tamPathDest);
+	return comandoSerializado;
+}
 
 map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
 	
@@ -169,7 +208,6 @@ size_t ParserComandos::obtenerTamanioLista(map<TPID, ListaPaths*> &mapa) {
 	tamanio += sizeof(size_t) * mapa.size();
 	// suma el tamanio de la lista entera
 	tamanio += sizeof(size_t);
-	
 	map<TPID, ListaPaths*>::iterator itM = mapa.begin();
 	ListaPaths::iterator itL;
 	for(; itM != mapa.end(); itM++) {
@@ -180,7 +218,21 @@ size_t ParserComandos::obtenerTamanioLista(map<TPID, ListaPaths*> &mapa) {
 			tamanio += itL->size();
 		}
 	}
+	
+	cout << "Retorna: " << tamanio << endl;
 	return tamanio;
+}
+
+size_t ParserComandos::obtenerTamanioCompDescomp(const string &path) {
+	return sizeof(TPID) + sizeof(TCOM) + sizeof(size_t) + path.size();
+}
+
+size_t ParserComandos::obtenerTamanioSolicitarTransf(const string &pathArchivo, 
+										const string &pathDestino) {
+	size_t tamPathArch = pathArchivo.size();
+	size_t tamPathDest = pathDestino.size();
+	return 2 * sizeof(TPID) + sizeof(TCOM) + 2 * sizeof(size_t) + tamPathArch + 
+								tamPathDest;
 }
 
 size_t ParserComandos::obtenerTamanioComando() {

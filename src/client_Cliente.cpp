@@ -11,9 +11,9 @@ Cliente::Cliente(){
 		this->estaConectado = false;
 }
 
-Cliente::~Cliente(){
-    // this->fifoEscritura->cerrar();
-    // this->fifoLectura->cerrar();
+Cliente::~Cliente() {
+    if(this->estaConectado)
+		this->desconectar();
     if(this->fifoLectura)
 		delete this->fifoLectura;
     delete this->fifoEscritura;
@@ -22,6 +22,10 @@ Cliente::~Cliente(){
 
 void Cliente::conectarAlServidor(){
     stringstream ss;
+    if(this->estaConectado) {
+    	cout << "Ya se encuentra conectado al servidor" << endl;
+    	return;
+    }
     ss << "fifo" << getpid();
     this->fifoLectura = new Fifo(ss.str().c_str());
     this->escribirMensajeAlServidor(ALTA, "");
@@ -33,9 +37,7 @@ void Cliente::conectarAlServidor(){
     	cout << "Conexión realizada con éxito" << endl;
 			this->estaConectado = true;
     }
-    else {
-    	cout << "Ya se encuentra conectado al servidor" << endl;
-    }
+    
 }
 
 void Cliente::desconectar() {
@@ -58,16 +60,38 @@ void Cliente::desconectar() {
 	}
 }
 
-int Cliente::compartirArchivo(string pathArchivo){
-    return escribirMensajeAlServidor(COMPARCH,pathArchivo);    
+int Cliente::compartirArchivo(string &pathArchivo){
+    ParserComandos parser;
+    char *aEnviar = parser.armarCompDescomp(COMPARCH, getpid(), pathArchivo);
+    // Incremento al semáforo para desbloquear al fifo del servidor
+    this->semEscritura->v();
+    this->fifoEscritura->escribir(aEnviar, parser.obtenerTamanioCompDescomp(pathArchivo));
+    return 0;
 }
 
-int Cliente::dejarDeCompartirArchivo(string pathArchivo){
-    return escribirMensajeAlServidor(DESCOMPARCH,pathArchivo);
+int Cliente::dejarDeCompartirArchivo(string &pathArchivo){
+    ParserComandos parser;
+    char *aEnviar = parser.armarCompDescomp(DESCOMPARCH, getpid(), pathArchivo);
+    // Incremento al semáforo para desbloquear al fifo del servidor
+    this->semEscritura->v();
+    this->fifoEscritura->escribir(aEnviar, parser.obtenerTamanioCompDescomp(pathArchivo));
+    return 0;
 }
 
 map<TPID,ListaPaths*>* Cliente::getCompartidos(){
-    return NULL;
+    char buffer[BUFSIZE], *bufDef = buffer;
+    size_t tamLista;
+    escribirMensajeAlServidor(LISTACOMP,"");
+    this->fifoLectura->leer(buffer,BUFSIZE);
+    memcpy((void *) &tamLista, (void *) buffer, sizeof(size_t));
+    
+    if(tamLista > BUFSIZE) {
+		bufDef = new char[tamLista];
+		memcpy((void *) bufDef, (void *) buffer, BUFSIZE);
+		this->fifoLectura->leer(bufDef + BUFSIZE, tamLista - BUFSIZE);
+	}
+	ParserComandos parser(bufDef);
+	return parser.obtenerListaCompartidos();
 }
 
 int Cliente::iniciarDescarga(string pathArchivo){
@@ -78,9 +102,8 @@ int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
 	// Abro el fifo de lectura del servidor
     size_t longMensaje = mensaje.length();
     char* msj = new char[sizeof(TCOM) + sizeof(TPID) + longMensaje];
-    //strlen(msj);
     TPID pid = getpid();
-
+	
     // Formo el mensaje compuesto de: tipo de operación + pid + mensaje
     memcpy(msj, &tipo, sizeof(TCOM));
     memcpy(msj + sizeof(TCOM), &pid, sizeof(TPID));

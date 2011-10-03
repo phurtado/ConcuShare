@@ -86,6 +86,42 @@ class ParserComandos {
 		 */
 		std::string getPathArchivoSolicitado();
 		
+		/* metodo para armar el comando para compartir/descompartir un archivo
+		 * comando: comando a usar (COMPARCH o DESCOMPARCH)
+		 * pid: pid del cliente
+		 * path: path del archivo a compartir/descompartir
+		 * Retorna: un char* apuntando al comando serializado.
+		 */
+		char* armarCompDescomp(TCOM comando, TPID pid, std::string &path);
+		
+		/*metodo para armar el comando de solicitar transferencia de archivo
+		 * comando: idem armarCompDescomp
+		 * pidSolicitante: pid del cliente que solicita el archivo
+		 * pidDuenio: pid del cliente dueño del archivo
+		 * pathArchivo: path del archivo
+		 * pathDestino: path del archivo destino
+		 * Retorna: un char* apuntando al comando serializado.
+		 */
+		char *armarSolicitarTransf(TCOM comando, TPID pidSolicitante, 
+		TPID pidDuenio, std::string &pathArchivo, std::string &pathDestino);
+		
+		
+		/* metodo para obtener el tamaño en bytes del comando para 
+		 * compartir/descompartir un archivo.
+		 * path: path del archivo a compartir/descompartir
+		 * Retorna: el tamaño del comando.
+		 */
+		size_t obtenerTamanioCompDescomp(const std::string &path);
+		
+		/* metodo para obtener el tamaño en bytes del comando para 
+		 * solicitar transferencia de un archivo.
+		 * pathArchivo: path del archivo a pedido
+		 * pathDestino: path del archivo destino
+		 * Retorna: el tamaño del comando.
+		 */
+		size_t obtenerTamanioSolicitarTransf(const std::string &pathArchivo, 
+										const std::string &pathDestino);
+		
 		
 		// Comando Pedir Lista de archivos
 		

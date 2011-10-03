@@ -17,14 +17,12 @@ void Servidor::setContinua(bool continua) {
 int Servidor::leerComando(ParserComandos &parser) {
 	// Decremento el semáforo para que el fifo se bloquee hasta que
 	// algún cliente le escriba algo
-	cout << "Semaforo" << endl;
 	if(this->semLectura->p())
 		cout << "Error en p" << endl;
-	cout << "A leer" << endl;
-	int res = this->fifoLectura->leer(this->buffer, BUFSIZE);
-	int i = 2;
-
-	if(res <= 0) // si es 0 es porque el cliente se cerro
+	
+	int res = this->fifoLectura->leer(this->buffer, BUFSIZE), i = 2;
+	
+	if(res < 0)
 		return -1;
 	
 	int tam = parser.obtenerTamanioComando();
@@ -38,16 +36,15 @@ int Servidor::leerComando(ParserComandos &parser) {
 			return -1;
 		res += resProv;
 		i++;
-		cout << "Leido resP = " << resProv << ", res = " << res << "tam = " << tam << endl;
 		parser.setBuffer(this->buffer);
 	}
-	cout << "Caracteres leidos: " << res << endl;
 	return 0;
 }
 
 void Servidor::escucharComandos() {
 	ParserComandos parser(this->buffer);
-	string pathArchivo;
+	string pathArchivo, pathDestino;
+	TPID pidClienteDuenio = 0;
 	while(this->sigueEscuchando) {
 		if(leerComando(parser))
 			return;
@@ -74,14 +71,12 @@ void Servidor::escucharComandos() {
 				break;
 			case PEDIRARCH:
 				pathArchivo = parser.getPathArchivoSolicitado();
-				string pathDestino = parser.getPathDestino();
-				TPID pidClienteDuenio = parser.getPidClienteDuenioArchivo();
+				pathDestino = parser.getPathDestino();
+				pidClienteDuenio = parser.getPidClienteDuenioArchivo();
 				transferirArchivo(pathArchivo, pathDestino, pidProceso, pidClienteDuenio);
-				cout << "transferencia desde " << pidClienteDuenio << 
-				" hasta " << pidProceso << 
-				" el archivo " << pathArchivo << " de size " << 
-				parser.getTamanoStringPath() << " al archivo " << 
-				pathDestino << " de size " << parser.getTamanioStringPathDestino() << endl;
+				break;
+				default:
+					cout << "Comando incorrecto:" << comando << endl;
 		}
 	}
 }
@@ -114,9 +109,9 @@ int Servidor::bajaCliente(TPID pidCliente) {
 		// Lo encontro
 		this->mapaPaths->erase(itM);
 		(*this->fifosEscritura)[pidCliente]->escribir((char*) BAJAOK, strlen(BAJAOK));
-		// Cierro la fifo luego de mandar el mensaje
-		//(*this->fifosEscritura)[pidCliente]->cerrar();
+		
 		delete (*this->fifosEscritura)[pidCliente];
+		this->fifosEscritura->erase(pidCliente);
 		return 0;
 	}
 
@@ -130,6 +125,7 @@ int Servidor::enviarListaCompartidosACliente(TPID pidCliente) {
 	if(itM != this->fifosEscritura->end()) { // lo encontro, cliente valido
 		size_t tamanioLista = parser.obtenerTamanioLista(*this->mapaPaths);
 		char *listaSerializada = parser.serializarLista(*this->mapaPaths, tamanioLista);
+		cout << "Eviando lista a cliente " << itM->first << " TAMLista: " << tamanioLista << endl;
 		itM->second->escribir(listaSerializada, tamanioLista);
 		return 0;
 	}
@@ -139,6 +135,8 @@ int Servidor::enviarListaCompartidosACliente(TPID pidCliente) {
 
 int Servidor::compartirArchivo(string &pathArchivo, TPID pidCliente) {
 	cout << "Compartiendo archivo " << pathArchivo << ", del pid " << pidCliente << endl;
+	if(archivoCompartidoActualmente(pathArchivo))
+		cout << "Archivo compartiendose previamente." << endl;
 	map< TPID, ListaPaths* >::iterator itM = this->mapaPaths->find(pidCliente);
 	if(itM != this->mapaPaths->end()) { // lo encontro
 		itM->second->push_back(pathArchivo);
@@ -148,7 +146,19 @@ int Servidor::compartirArchivo(string &pathArchivo, TPID pidCliente) {
 	return -1;
 }
 
+int Servidor::archivoCompartidoActualmente(string &pathArchivo) {
+	map<TPID, ListaPaths*>::iterator itM = this->mapaPaths->begin();
+	ListaPaths::iterator itL;
+	for(; itM != this->mapaPaths->end(); itM++) {
+		ListaPaths *lista = itM->second;
+		if(find(lista->begin(), lista->end(), pathArchivo) != lista->end())
+			return 1;
+	}
+	return 0;
+}
+
 int Servidor::descompartirArchivo(string &pathArchivo, TPID pidCliente) {
+	cout << "Dejando de compartir el archivo " << pathArchivo << endl;
 	map< TPID, ListaPaths* >::iterator itM = this->mapaPaths->find(pidCliente);
 	if(itM != this->mapaPaths->end()) { // lo encontro
 		itM->second->remove(pathArchivo);
@@ -160,6 +170,10 @@ int Servidor::descompartirArchivo(string &pathArchivo, TPID pidCliente) {
 
 int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino, 
 				TPID pidClienteDestino, TPID pidClienteDuenioArchivo) {
+	cout << "transferencia desde " << pidClienteDuenioArchivo << 
+				" hasta " << pidClienteDestino << 
+				" el archivo " << pathArchivo << " al archivo " << 
+				pathDestino << endl;
 	
 	TPID pid = fork();
 	
@@ -174,8 +188,8 @@ Servidor::~Servidor() {
 	this->fifoLectura->cerrar();
 	map< TPID, Fifo*>::iterator itF = this->fifosEscritura->begin();
 	for(; itF != this->fifosEscritura->end(); itF++)
-		itF->second->cerrar();
-	
+		// el que la cierra es cada cliente
+		delete (itF->second);
 	map<TPID, ListaPaths*>::iterator itM = this->mapaPaths->begin();
 	for(; itM != this->mapaPaths->end(); itM++)
 		delete itM->second;

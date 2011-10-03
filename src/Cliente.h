@@ -5,6 +5,7 @@
 #include "common.h"
 #include "fifo.h"
 #include "Semaforo.h"
+#include "parsercomandos.h"
 
 class Cliente{
     private:
@@ -18,8 +19,8 @@ class Cliente{
         virtual ~Cliente();
         void conectarAlServidor();
         void desconectar();
-        int compartirArchivo(std::string pathArchivo);
-        int dejarDeCompartirArchivo(std::string pathArchivo);
+        int compartirArchivo(std::string &pathArchivo);
+        int dejarDeCompartirArchivo(std::string &pathArchivo);
         std::map<TPID,ListaPaths*>* getCompartidos();
         int iniciarDescarga(std::string pathArchivo);
 
