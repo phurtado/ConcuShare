@@ -15,7 +15,6 @@ void handler_SIGINT(int sig) {
 
 void handler_SIGTERM(int sig) {
 	cout << "Terminé con SIGINT" << endl;
-	// cout << "Ni en pedo paso esto..." << endl;
 }
 
 

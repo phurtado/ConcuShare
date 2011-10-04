@@ -91,7 +91,10 @@ map<TPID,ListaPaths*>* Cliente::getCompartidos(){
 		this->fifoLectura->leer(bufDef + BUFSIZE, tamLista - BUFSIZE);
 	}
 	ParserComandos parser(bufDef);
-	return parser.obtenerListaCompartidos();
+	map<TPID,ListaPaths*>* mapa = parser.obtenerListaCompartidos();
+	if(bufDef != buffer)
+		delete[] bufDef;
+	return mapa;
 }
 
 int Cliente::iniciarDescarga(string pathArchivo){

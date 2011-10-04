@@ -8,6 +8,37 @@
 
 using namespace std;
 
+Cliente *cliente = NULL;
+
+void handler_SIGINT(int sig) {
+	if(cliente)
+		delete cliente;
+	cliente = NULL;
+}
+
+void handler_SIGTERM(int sig) {
+	cout << "Terminé con SIGINT" << endl;
+}
+
+
+void registrarSignalTerm() {
+	struct sigaction sa;
+	sigemptyset(& sa.sa_mask);
+	sa.sa_handler = handler_SIGINT;
+	
+	sigaction(SIGINT, &sa, NULL);
+}
+
+void registrarSignalTerm2() {
+	struct sigaction sa;
+	sigemptyset(& sa.sa_mask);
+	sa.sa_handler = handler_SIGTERM;
+	
+	sigaction(SIGTERM, &sa, NULL);
+}
+
+
+
 void mostrarListaCompartidos(map<TPID, ListaPaths*> *mapaCompartidos) {
 	map<TPID, ListaPaths*>::iterator itM = mapaCompartidos->begin();
 	ListaPaths::iterator itL;
@@ -38,11 +69,11 @@ int main() {
 	int opcion = 1;
 	char buffer[1000];
 	string path;
-	Cliente cliente;
+	cliente = new Cliente();
 	map<TPID, ListaPaths*> *mapaCompartidos = NULL;
-	
-
-	while(1) {
+	registrarSignalTerm();
+	bool continua = true;
+	while(continua) {
 		// Imprimo el menú del programa
 		FILE* fd = fopen("MenuCliente.txt", "r");
 		do {
@@ -50,17 +81,17 @@ int main() {
 			cout << buffer << endl;
 		} while(!feof(fd));
 		fclose(fd);
-	
+		
 		cout << endl << "Número de opción: ";
 		scanf("%s", buffer);
 		opcion = atoi(buffer);
 
 		switch(opcion) {
 		case 1:
-			cliente.conectarAlServidor();
+			cliente->conectarAlServidor();
 			break;
 		case 2:
-			cliente.desconectar();
+			cliente->desconectar();
 			break;
 		case 3:
 			// OJO QUE PUEDEN SER VARIOS A LA VEZ
@@ -68,63 +99,31 @@ int main() {
 			if(solicitarPath(path, "compartir"))
 				break;
 			
-			cliente.compartirArchivo(path);
+			cliente->compartirArchivo(path);
 			break;
 		case 4:
 			// IDEM CASO 3
 			if(solicitarPath(path, "dejar de compartir"))
 				break;
 			
-			cliente.dejarDeCompartirArchivo(path);
+			cliente->dejarDeCompartirArchivo(path);
 			break;
 		case 5:
 			break;
 		case 6:
 			if(mapaCompartidos) delete mapaCompartidos;
-			mapaCompartidos = cliente.getCompartidos();
+			mapaCompartidos = cliente->getCompartidos();
 			mostrarListaCompartidos(mapaCompartidos);
 			break;
 		case 7:
-			return 0;
+			if(cliente)
+				delete cliente;
+			continua = false;
+			break;
 		default:
 			cout << "Ingrese una opción válida" << endl;
 			}
 	}
-
-
-	/*cout << "lala main cliente" << endl;
-	Fifo *fifo = new Fifo(NOMBREFIFOSERVIDOR);
-	Semaforo semaforo((char *) NOMBREFIFOSERVIDOR, 0);
-	char linea[2 * BUFSIZE];
-	TCOM comando = PEDIRARCH;
-	TPID pidO = 111, pidD = 112;
-	size_t tamP = 9, tamD = 8;
-	string path = "lala45679";
-	string pathD = "titi0123";
-	char *pos = linea;
-	
-	memcpy((void *) pos, (void *) &comando, sizeof(TCOM));
-	pos += sizeof(TCOM);
-	memcpy((void *) pos, (void *) &pidO, sizeof(TPID));
-	pos += sizeof(TPID);
-	memcpy((void *) pos, (void *) &tamP, sizeof(size_t));
-	pos += sizeof(size_t);
-	memcpy((void *) pos, (void *) &tamD, sizeof(size_t));
-	pos += sizeof(size_t);
-	memcpy((void *) pos, (void *) &pidD, sizeof(TPID));
-	pos += sizeof(TPID);
-	memcpy((void *) pos, (void *) path.c_str(), path.size());
-	pos += path.size();
-	memcpy((void *) pos, (void *) pathD.c_str(), pathD.size());
-	pos += pathD.size();
-	
-	
-	cout << "Tam Comando: " << pos - linea << endl;
-	// Incremento el semáforo al escribir
-	semaforo.v();	
-	fifo->escribir(linea, pos - linea);
-	fifo->cerrar();
-	cout << "Terminé de escribir" << endl;*/
 	
 	return 0;
 }
