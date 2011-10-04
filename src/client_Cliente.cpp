@@ -4,19 +4,18 @@
 using namespace std;
 
 Cliente::Cliente(){
-    
-    this->fifoLectura = NULL;
-    this->fifoEscritura = new Fifo(NOMBREFIFOSERVIDOR);
-    this->semEscritura = new Semaforo( (char*) NOMBREFIFOSERVIDOR, 0);
-		this->estaConectado = false;
+  this->fifoLectura = NULL;
+  this->fifoEscritura = new Fifo(NOMBREFIFOSERVIDOR);
+  this->semEscritura = new Semaforo( (char*) NOMBREFIFOSERVIDOR, 0);
+	this->estaConectado = false;
 }
 
 Cliente::~Cliente() {
-    if(this->estaConectado)
+  if(this->estaConectado)
 		this->desconectar();
-    if(this->fifoLectura)
+  if(this->fifoLectura)
 		delete this->fifoLectura;
-    delete this->fifoEscritura;
+  delete this->fifoEscritura;
 	delete this->semEscritura;
 }
 
@@ -89,17 +88,49 @@ map<TPID,ListaPaths*>* Cliente::getCompartidos(){
 		bufDef = new char[tamLista];
 		memcpy((void *) bufDef, (void *) buffer, BUFSIZE);
 		this->fifoLectura->leer(bufDef + BUFSIZE, tamLista - BUFSIZE);
-	}
-	ParserComandos parser(bufDef);
-	map<TPID,ListaPaths*>* mapa = parser.obtenerListaCompartidos();
-	if(bufDef != buffer)
-		delete[] bufDef;
-	return mapa;
+		}
+
+		ParserComandos parser(bufDef);
+		map<TPID,ListaPaths*>* mapa = parser.obtenerListaCompartidos();
+		if(bufDef != buffer)
+			delete[] bufDef;
+		return mapa;
 }
 
-int Cliente::iniciarDescarga(string pathArchivo){
+int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
+	// Le pido al servidor la lista de archivos compartidos y valido
+	// que sharePath y pid sean válidos
+	map< TPID, ListaPaths* >* hash = this->getCompartidos(); 
+	map< TPID, ListaPaths* >::iterator itM = hash->find(pid);
+	if (itM == hash->end()) {
+		// El cliente no existe !
+		cout << "El cliente con el pid: " << pid << " no se encuentra conectado" << endl;
+		return -1;
+	}
+
+	// El cliente existe..., verifico si el mismo está compartiendo el archivo que
+	// pide el cliente.
+	ListaPaths::iterator itL = itM->second->begin();
+	for (; itL != itM->second->end(); itL++) {
+		if ( *itL == sharePath ) 
+			break;
+	}
+		
+	if ( itL == itM->second->end()) {
+		// El archivo compartido no existe...
+		return -2;
+	}
+	
+	// El archivo existe!!!!, podemos comenzar la transferencia
+	cout << "Debería transmitir el archivo!!" << endl;
+	// this->escribirMensajeAlServidor(PEDIRARCH,  
     return 0;
 }
+
+bool Cliente::conectado() {
+	return this->estaConectado;
+}
+
 
 int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
 	// Abro el fifo de lectura del servidor
@@ -111,13 +142,11 @@ int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
     memcpy(msj, &tipo, sizeof(TCOM));
     memcpy(msj + sizeof(TCOM), &pid, sizeof(TPID));
     memcpy(msj + sizeof(TCOM) + sizeof(TPID), mensaje.c_str(), longMensaje);
-    cout << "VOY A ESCRIBIR " << pid << " " << tipo << " " << mensaje << endl;
+    //cout << "VOY A ESCRIBIR " << pid << " " << tipo << " " << mensaje << endl;
 	
     // Incremento al semáforo para desbloquear al fifo del servidor
     this->semEscritura->v();
-		cout << "Antes de Escribir??" << endl;
     this->fifoEscritura->escribir(msj, sizeof(TCOM) + sizeof(TPID) + longMensaje);
-		cout << "Después de escribir??" << endl;
     // Libero la memoria de la fifo
     return 0;
 }

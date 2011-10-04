@@ -125,11 +125,10 @@ int Servidor::enviarListaCompartidosACliente(TPID pidCliente) {
 	if(itM != this->fifosEscritura->end()) { // lo encontro, cliente valido
 		size_t tamanioLista = parser.obtenerTamanioLista(*this->mapaPaths);
 		char *listaSerializada = parser.serializarLista(*this->mapaPaths, tamanioLista);
-		cout << "Eviando lista a cliente " << itM->first << " TAMLista: " << tamanioLista << endl;
+		cout << "Enviando lista a cliente " << itM->first << " TAMLista: " << tamanioLista << endl;
 		itM->second->escribir(listaSerializada, tamanioLista);
 		return 0;
 	}
-	
 	return -1;
 }
 

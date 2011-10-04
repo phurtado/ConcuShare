@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
 #include "common.h"
 #include "fifo.h"
 #include "Cliente.h"
@@ -20,7 +19,6 @@ void handler_SIGTERM(int sig) {
 	cout << "Terminé con SIGINT" << endl;
 }
 
-
 void registrarSignalTerm() {
 	struct sigaction sa;
 	sigemptyset(& sa.sa_mask);
@@ -36,8 +34,6 @@ void registrarSignalTerm2() {
 	
 	sigaction(SIGTERM, &sa, NULL);
 }
-
-
 
 void mostrarListaCompartidos(map<TPID, ListaPaths*> *mapaCompartidos) {
 	map<TPID, ListaPaths*>::iterator itM = mapaCompartidos->begin();
@@ -56,12 +52,60 @@ int solicitarPath(string &path, string accion) {
 	cin >> path;
 	fstream *arch = new fstream(path.c_str(), fstream::in);
 	if(arch->fail()) {
-		cout << "El archivo no existe" << endl;
 		return 1;
 	}
 	arch->close();
 	delete arch;
 	return 0;
+}
+
+void descargarArchivo() {
+	int pid;
+	string destPath;
+	string sharePath;
+	char buffer[10];
+
+	// Por el momento asumo que lo que me ingresan es un número, dsp valido
+	cout << "Ingrese el pid del cliente del cual quiere descargar el archivo" << endl;
+	fscanf(stdin, "%s", buffer);
+	pid = atoi(buffer);
+	if (pid == 0) {
+		cout << "El pid ingresado no es válido" << endl;
+		return;
+	}
+
+	// Verifico si la ruta de destino es válida.
+	cout << "Ingrese el path de destino" << endl;
+	cin >> destPath;
+	fstream *arch = new fstream(destPath.c_str(), fstream::in);
+	if (arch->fail()) { 
+		cout << "El path de destino es inválido" << endl;
+		arch->close();
+		delete arch;
+		return;
+	}
+	arch->close();
+	delete arch;
+
+	// Verifico si la ruta del archivo compartido es válida.
+	cout << "Ingrese el path del archivo compartido" << endl;
+	cin >> sharePath;
+	arch = new fstream(sharePath.c_str(), fstream::in);
+	if (arch->fail()) {
+		cout << "El path del archivo compartido es inválido" << endl;
+		arch->close();
+		delete arch;
+		return;
+	}
+	arch->close();
+	delete arch;
+
+	// Si es válida, procedo a pasarle los datos al cliente
+	cliente->empezarTransferencia(destPath, sharePath, pid);
+}
+
+void errorClienteNoConectado() {
+	cout << "Debe conectarse al servidor para realizar alguna tarea" << endl;
 }
 	
 
@@ -73,6 +117,7 @@ int main() {
 	map<TPID, ListaPaths*> *mapaCompartidos = NULL;
 	registrarSignalTerm();
 	bool continua = true;
+
 	while(continua) {
 		// Imprimo el menú del programa
 		FILE* fd = fopen("MenuCliente.txt", "r");
@@ -90,38 +135,63 @@ int main() {
 		case 1:
 			cliente->conectarAlServidor();
 			break;
+
 		case 2:
 			cliente->desconectar();
 			break;
+
 		case 3:
-			// OJO QUE PUEDEN SER VARIOS A LA VEZ
-			
-			if(solicitarPath(path, "compartir"))
+			if (cliente->conectado() == false) {
+				errorClienteNoConectado();
+				break;	
+			}	
+			if(solicitarPath(path, "compartir")) {
+				cout << "El path del archivo a compartir no existe" << endl;
 				break;
-			
+			}
 			cliente->compartirArchivo(path);
 			break;
+
 		case 4:
 			// IDEM CASO 3
-			if(solicitarPath(path, "dejar de compartir"))
+			if (cliente->conectado() == false) {
+				errorClienteNoConectado();
+				break;	
+			}
+			if(solicitarPath(path, "dejar de compartir")) {
+				cout << "El path del archivo a descompartir no existe" << endl;
 				break;
-			
+			}
 			cliente->dejarDeCompartirArchivo(path);
 			break;
+
 		case 5:
+			if (cliente->conectado() == false) {
+				errorClienteNoConectado();
+				break;
+			}
+			descargarArchivo();
 			break;
+
 		case 6:
+			if (cliente->conectado() == false) {
+				errorClienteNoConectado();
+				break;
+			}
 			if(mapaCompartidos) delete mapaCompartidos;
 			mapaCompartidos = cliente->getCompartidos();
 			mostrarListaCompartidos(mapaCompartidos);
 			break;
+
 		case 7:
 			if(cliente)
 				delete cliente;
 			continua = false;
 			break;
+
 		default:
 			cout << "Ingrese una opción válida" << endl;
+			break;
 			}
 	}
 	
