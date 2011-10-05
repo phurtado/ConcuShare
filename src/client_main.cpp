@@ -4,6 +4,8 @@
 #include "common.h"
 #include "fifo.h"
 #include "Cliente.h"
+#include <sys/stat.h>
+
 
 using namespace std;
 
@@ -74,31 +76,30 @@ void descargarArchivo() {
 		return;
 	}
 
-	// Verifico si la ruta de destino es válida.
+	// Verifico si la ruta de destino es un directorio válido.
 	cout << "Ingrese el path de destino" << endl;
+	struct stat buf;
 	cin >> destPath;
-	fstream *arch = new fstream(destPath.c_str(), fstream::in);
-	if (arch->fail()) { 
-		cout << "El path de destino es inválido" << endl;
-		arch->close();
-		delete arch;
+	if (lstat(destPath.c_str(), &buf) == -1) {
+		cout << "El path de destino ingresado no es válido" << endl;
 		return;
 	}
-	arch->close();
-	delete arch;
+	if(! S_ISDIR(buf.st_mode)) {
+		cout << "El path de destino debe ser un directorio" << endl;
+		return;
+	}
 
 	// Verifico si la ruta del archivo compartido es válida.
 	cout << "Ingrese el path del archivo compartido" << endl;
 	cin >> sharePath;
-	arch = new fstream(sharePath.c_str(), fstream::in);
-	if (arch->fail()) {
-		cout << "El path del archivo compartido es inválido" << endl;
-		arch->close();
-		delete arch;
+	if(lstat(sharePath.c_str(), &buf) == -1) {
+		cout << "El path del archivo compartido no es válido" << endl;
 		return;
 	}
-	arch->close();
-	delete arch;
+	if(! S_ISREG(buf.st_mode)) {
+		cout << "El path del archiv compartido debe ser un archivo regular" << endl;
+		return;
+	}
 
 	// Si es válida, procedo a pasarle los datos al cliente
 	cliente->empezarTransferencia(destPath, sharePath, pid);

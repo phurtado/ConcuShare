@@ -118,6 +118,7 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 		
 	if ( itL == itM->second->end()) {
 		// El archivo compartido no existe...
+		cout << "El cliente con el pid: " << pid << " no está compartiendo el archivo " << sharePath << endl;
 		return -2;
 	}
 	
