@@ -17,8 +17,8 @@ void Servidor::setContinua(bool continua) {
 int Servidor::leerComando(ParserComandos &parser) {
 	// Decremento el semáforo para que el fifo se bloquee hasta que
 	// algún cliente le escriba algo
-	if(this->semLectura->p())
-		cout << "Error en p" << endl;
+	this->semLectura->p();
+	
 	
 	int res = this->fifoLectura->leer(this->buffer, BUFSIZE), i = 2;
 	
@@ -134,15 +134,17 @@ int Servidor::enviarListaCompartidosACliente(TPID pidCliente) {
 
 int Servidor::compartirArchivo(string &pathArchivo, TPID pidCliente) {
 	cout << "Compartiendo archivo " << pathArchivo << ", del pid " << pidCliente << endl;
-	if(archivoCompartidoActualmente(pathArchivo))
-		cout << "Archivo compartiendose previamente." << endl;
-	map< TPID, ListaPaths* >::iterator itM = this->mapaPaths->find(pidCliente);
-	if(itM != this->mapaPaths->end()) { // lo encontro
-		itM->second->push_back(pathArchivo);
-		return 0;
-	}
-	//no encontro el cliente con el pid pidCliente
-	return -1;
+	if(! archivoCompartidoActualmente(pathArchivo)) {
+		map< TPID, ListaPaths* >::iterator itM = this->mapaPaths->find(pidCliente);
+		if(itM != this->mapaPaths->end()) { // lo encontro
+			itM->second->push_back(pathArchivo);
+			return 0;
+		}
+		//no encontro el cliente con el pid pidCliente
+		return -1;
+	}  //archivo compartido de antes
+	cout << "Archivo compartiendose previamente." << endl;
+	return -2;
 }
 
 int Servidor::archivoCompartidoActualmente(string &pathArchivo) {
@@ -177,7 +179,7 @@ int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino,
 	TPID pid = fork();
 	
 	if(pid == 0) { // es el hijo
-		execl("./transf", "transf", pathArchivo.c_str(), pathDestino.c_str(), 0);
+		execl("./transf", "transf", "-E", pathArchivo.c_str(), pathDestino.c_str(), 0);
 	}
 	
 	return 0;

@@ -9,6 +9,7 @@
 #include	<sys/types.h>
 #include	<sys/ipc.h>
 #include	<sys/shm.h>
+#include <stdlib.h>
 
 
 template <class T> class MemoriaCompartida {
@@ -24,7 +25,7 @@ public:
 
 	MemoriaCompartida ();
 	~MemoriaCompartida ();
-	int crear ( char *archivo,char letra );
+	int crear ( const char *archivo,char letra );
 	void liberar ();
 	void escribir ( T dato );
 	T leer ();
@@ -37,7 +38,7 @@ template <class T> MemoriaCompartida<T> :: MemoriaCompartida () {
 template <class T> MemoriaCompartida<T> :: ~MemoriaCompartida () {
 }
 
-template <class T> int MemoriaCompartida<T> :: crear ( char *archivo,char letra ) {
+template <class T> int MemoriaCompartida<T> :: crear (const char *archivo,char letra ) {
 
 	// generacion de la clave
 	key_t clave = ftok ( archivo,letra );
@@ -51,7 +52,7 @@ template <class T> int MemoriaCompartida<T> :: crear ( char *archivo,char letra 
 			return ERROR_SHMGET;
 		else {
 			// attach del bloque de memoria al espacio de direcciones del proceso
-			void* ptrTemporal = shmat ( this->shmId,NULL,0 );
+			void* ptrTemporal = shmat ( this->shmId, NULL, 0 );
 
 			if ( ptrTemporal == (void *) -1 ) {
 				return ERROR_SHMAT;

@@ -10,15 +10,20 @@ class Semaforo {
 private:
 	int id;
 	int valorInicial;
+	int inicializar (int posSem, int valor);
 	
-	int inicializar ();
-
 public:
-	Semaforo ( char* nombre,int valorInicial );
+	/* construye una instancia con un grupo de un semaforo */
+	Semaforo (const char* nombre, int valorInicial );
+	
+	/* construye una instancia con un grupo de cantidadSemaforos semaforos
+	 * y se inicializan los semaforos con los valoresIniciales.
+	 */
+	Semaforo ( const char* nombre, int cantidadSemaforos, int *valoresIniciales );
+	
 	virtual ~Semaforo();
-	int p (); // decrementa
-	int v (); // incrementa
-	int getValor();
+	int p (int numSem = 0); // decrementa
+	int v (int numSem = 0); // incrementa
 	void eliminar ();
 };
 

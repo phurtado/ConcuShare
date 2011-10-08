@@ -1,16 +1,24 @@
 #include "Semaforo.h"
 
-Semaforo::Semaforo ( char* nombre,int valorInicial ) {
-	this->valorInicial = valorInicial;
+Semaforo::Semaforo (const char* nombre,int valorInicial ) {
 	key_t clave = ftok ( nombre,'a' );
-	this->id = semget ( clave,1,00770 | IPC_CREAT );
-	this->inicializar ();
+	this->id = semget ( clave, 1, 00770 | IPC_CREAT );
+	inicializar(0, valorInicial);
+}
+
+
+Semaforo::Semaforo ( const char* nombre, int cantidadSemaforos, int *valoresIniciales ) {
+	key_t clave = ftok ( nombre,'a' );
+	this->id = semget ( clave, cantidadSemaforos, 00770 | IPC_CREAT );
+	
+	for(int i = 0; i < cantidadSemaforos; i++)
+		inicializar(i, valoresIniciales[i]);
 }
 
 Semaforo::~Semaforo() {
 }
 
-int Semaforo::inicializar () {
+int Semaforo::inicializar (int posSem, int valor) {
 	union semnum {
 		int val;
 		struct semid_ds* buf;
@@ -18,23 +26,23 @@ int Semaforo::inicializar () {
 	};
 
 	semnum init;
-	init.val = this->valorInicial;
-	int resultado = semctl ( this->id,0,SETVAL,init );
+	init.val = valor;
+	int resultado = semctl ( this->id, posSem, SETVAL, init );
 	return resultado;
 }
 
-int Semaforo::p () {
+int Semaforo::p (int numSem) {
 	struct sembuf operacion;
-	operacion.sem_num = 0;	// numero de semaforo
+	operacion.sem_num = numSem;	// numero de semaforo
 	operacion.sem_op  = -1;	// restar 1 al semaforo
 	operacion.sem_flg = SEM_UNDO;
 	int resultado = semop ( this->id,&operacion,1 );
 	return resultado;
 }
 
-int Semaforo::v () {
+int Semaforo::v (int numSem) {
 	struct sembuf operacion;
-	operacion.sem_num = 0;	// numero de semaforo
+	operacion.sem_num = numSem;	// numero de semaforo
 	operacion.sem_op  = 1;	// sumar 1 al semaforo
 	operacion.sem_flg = SEM_UNDO;
 	int resultado = semop ( this->id,&operacion,1 );
@@ -42,5 +50,6 @@ int Semaforo::v () {
 }
 
 void Semaforo :: eliminar () {
+	// elimina el conjunto, semnum es ignorado
 	semctl ( this->id,0,IPC_RMID );
 }

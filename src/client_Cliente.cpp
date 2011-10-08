@@ -6,7 +6,7 @@ using namespace std;
 Cliente::Cliente(){
   this->fifoLectura = NULL;
   this->fifoEscritura = new Fifo(NOMBREFIFOSERVIDOR);
-  this->semEscritura = new Semaforo( (char*) NOMBREFIFOSERVIDOR, 0);
+  this->semEscritura = new Semaforo( (const char*) NOMBREFIFOSERVIDOR, 0);
 	this->estaConectado = false;
 }
 
@@ -124,7 +124,8 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 	
 	// El archivo existe!!!!, podemos comenzar la transferencia
 	cout << "Debería transmitir el archivo!!" << endl;
-	// this->escribirMensajeAlServidor(PEDIRARCH,  
+	// USAR parser.armarSolicitarTransf.......
+	//this->escribirMensajeAlServidor(PEDIRARCH,  
     return 0;
 }
 
