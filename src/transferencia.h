@@ -8,7 +8,7 @@
 #include <fstream>
 
 /* Letra a usar en la memoria compartida */
-#define LETRA 'a'
+#define LETRA 'c'
 
 /* numero de semaforo que bloquea lectura y escritura respectivamente */
 #define SEMLEER 0

@@ -6,8 +6,6 @@
 using namespace std;
 
 Transferencia::Transferencia(string &pathOrigen, string &pathDestino) {
-	
-	cout << "lala " << pathOrigen << " y " << pathDestino << endl;
 	FILE *a = fopen(pathDestino.c_str(), "wb");
 	fclose(a);
 	//this->streamEscritura = new fstream();
@@ -81,7 +79,6 @@ int Transferencia::recibir() {
 	// desbloqueo la escritura
 	this->semaforos->v(SEMESCR);
 	cout << "Lectura: termine" << endl;
-	cout << "Leidos de Memoria: " << b.getBuffer() << " tam = " << pos << endl;
 	escritura.write(b.getBuffer(), b.getTamEscrito());
 	
 	cout << "Lectura: TamArch: " << b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos << endl;

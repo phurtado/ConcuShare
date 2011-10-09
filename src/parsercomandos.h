@@ -10,9 +10,7 @@
 class ParserComandos {
     private:
         char *buffer;
-        
-        
-        char* serializarListaCliente(ListaPaths &lista, char * buffer);
+        char *serializarListaCliente(ListaPaths &lista, char * buffer);
         char *hidratarLista(char *posicionActual, ListaPaths *lista);
         
     

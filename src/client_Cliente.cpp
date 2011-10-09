@@ -65,6 +65,14 @@ int Cliente::compartirArchivo(string &pathArchivo){
     // Incremento al semáforo para desbloquear al fifo del servidor
     this->semEscritura->v();
     this->fifoEscritura->escribir(aEnviar, parser.obtenerTamanioCompDescomp(pathArchivo));
+    char buffer[100];
+    int bytesLeidos = this->fifoLectura->leer(buffer,100);
+    buffer[bytesLeidos] = 0;
+    if(string(buffer).compare(COMPOK)) {
+		cout << "Error al compartir el archivo." << endl;
+		return -1;
+	}
+	cout << "Archivo compartido exitosamente." << endl;
     return 0;
 }
 
@@ -74,6 +82,14 @@ int Cliente::dejarDeCompartirArchivo(string &pathArchivo){
     // Incremento al semáforo para desbloquear al fifo del servidor
     this->semEscritura->v();
     this->fifoEscritura->escribir(aEnviar, parser.obtenerTamanioCompDescomp(pathArchivo));
+    char buffer[100];
+    int bytesLeidos = this->fifoLectura->leer(buffer,100);
+    buffer[bytesLeidos] = 0;
+    if(string(buffer).compare(DESCOMPOK)) {
+		cout << "Error al dejar de compartir el archivo." << endl;
+		return -1;
+	}
+	cout << "Archivo no compartido exitosamente." << endl;
     return 0;
 }
 
@@ -89,11 +105,13 @@ map<TPID,ListaPaths*>* Cliente::getCompartidos(){
 		memcpy((void *) bufDef, (void *) buffer, BUFSIZE);
 		this->fifoLectura->leer(bufDef + BUFSIZE, tamLista - BUFSIZE);
 		}
-
+	
 		ParserComandos parser(bufDef);
 		map<TPID,ListaPaths*>* mapa = parser.obtenerListaCompartidos();
-		if(bufDef != buffer)
-			delete[] bufDef;
+		if(bufDef != buffer) {
+			
+			delete[] bufDef;}
+	
 		return mapa;
 }
 

@@ -54,6 +54,7 @@ int solicitarPath(string &path, string accion) {
 	cin >> path;
 	fstream *arch = new fstream(path.c_str(), fstream::in);
 	if(arch->fail()) {
+		delete arch;
 		return 1;
 	}
 	arch->close();

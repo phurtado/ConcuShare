@@ -126,7 +126,6 @@ map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
 		// recupero el PID del cliente
 		memcpy((void *) & pidCliente, (void *) posicionActual, sizeof(TPID));
 		posicionActual += sizeof(TPID);
-		
 		ListaPaths *lista = new ListaPaths();
 		posicionActual = hidratarLista(posicionActual, lista);
 		mapa->insert(pair< TPID, ListaPaths* >(pidCliente, lista));
@@ -140,19 +139,17 @@ char * ParserComandos::hidratarLista(char *posicion, ListaPaths *lista) {
 	// recupero el tamanio de la lista de paths
 	memcpy((void *) & tamanio, (void *) posicion, sizeof(size_t));
 	posicion += sizeof(size_t);
-	
 	while(nPathActual++ < tamanio) {
 		// recupero el tamanio del path
-		
 		memcpy((void *) & tamPath, (void *) posicion, sizeof(size_t));
 		posicion += sizeof(size_t);
 		
-		char *path = NULL;
-		if(tamPath > 0)
-			path = new char(tamPath);
-		memcpy((void *) path, (void *) posicion, tamPath);
-		posicion += tamPath;
-		lista->push_back(string(path, tamPath));
+		if(tamPath > 0) {
+			char *path = new char[tamPath];
+			memcpy((void *) path, (void *) posicion, tamPath);
+			posicion += tamPath;
+			lista->push_back(string(path, tamPath));
+		}
 	}
 	return posicion;
 }
@@ -218,8 +215,6 @@ size_t ParserComandos::obtenerTamanioLista(map<TPID, ListaPaths*> &mapa) {
 			tamanio += itL->size();
 		}
 	}
-	
-	cout << "Retorna: " << tamanio << endl;
 	return tamanio;
 }
 
@@ -247,7 +242,6 @@ size_t ParserComandos::obtenerTamanioComando() {
 				return sizeof(TCOM) + sizeof(TPID) + sizeof(size_t) + 
 					getTamanoStringPath();
 			case PEDIRARCH:
-				cout << "PEDIR ARCHIVOOO" << endl;
 				return sizeof(TCOM) + 2 * sizeof(TPID) + 2 * sizeof(size_t) + 
 					getTamanoStringPath() + getTamanioStringPathDestino();
 	}

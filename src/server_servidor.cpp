@@ -138,13 +138,12 @@ int Servidor::compartirArchivo(string &pathArchivo, TPID pidCliente) {
 		map< TPID, ListaPaths* >::iterator itM = this->mapaPaths->find(pidCliente);
 		if(itM != this->mapaPaths->end()) { // lo encontro
 			itM->second->push_back(pathArchivo);
+			(*this->fifosEscritura)[pidCliente]->escribir((char*) COMPOK, strlen(COMPERROR));
 			return 0;
 		}
-		//no encontro el cliente con el pid pidCliente
-		return -1;
-	}  //archivo compartido de antes
-	cout << "Archivo compartiendose previamente." << endl;
-	return -2;
+	}  //archivo compartido de antes o no encontro el cliente
+	(*this->fifosEscritura)[pidCliente]->escribir((char*) COMPERROR, strlen(COMPERROR));
+	return -1;
 }
 
 int Servidor::archivoCompartidoActualmente(string &pathArchivo) {
@@ -152,8 +151,9 @@ int Servidor::archivoCompartidoActualmente(string &pathArchivo) {
 	ListaPaths::iterator itL;
 	for(; itM != this->mapaPaths->end(); itM++) {
 		ListaPaths *lista = itM->second;
-		if(find(lista->begin(), lista->end(), pathArchivo) != lista->end())
+		if(find(lista->begin(), lista->end(), pathArchivo) != lista->end()) {
 			return 1;
+		}
 	}
 	return 0;
 }
@@ -163,9 +163,11 @@ int Servidor::descompartirArchivo(string &pathArchivo, TPID pidCliente) {
 	map< TPID, ListaPaths* >::iterator itM = this->mapaPaths->find(pidCliente);
 	if(itM != this->mapaPaths->end()) { // lo encontro
 		itM->second->remove(pathArchivo);
+		(*this->fifosEscritura)[pidCliente]->escribir((char*) COMPOK, strlen(COMPERROR));
 		return 0;
 	}
 	//no encontro el cliente con el pid pidCliente
+	(*this->fifosEscritura)[pidCliente]->escribir((char*) COMPERROR, strlen(COMPERROR));
 	return -1;
 }
 

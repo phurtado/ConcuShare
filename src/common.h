@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
-#include <iostream>
 #include <string>
 #include <sys/wait.h>
 
@@ -23,5 +22,10 @@ typedef pid_t TPID;
 #define ALTAWRONG "-1\0"
 #define BAJAOK "0\0"
 #define BAJAWRONG "-1\0"
+#define COMPOK "0\0"
+#define COMPERROR "-1\0"
+#define DESCOMPOK "0\0"
+#define DESCOMPERROR "-1\0"
+
 
 #endif
