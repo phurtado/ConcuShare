@@ -186,8 +186,6 @@ int main() {
 			break;
 
 		case 7:
-			if(cliente)
-				delete cliente;
 			continua = false;
 			break;
 
@@ -196,6 +194,8 @@ int main() {
 			break;
 			}
 	}
+	if(cliente)
+		delete cliente;
 	
 	return 0;
 }

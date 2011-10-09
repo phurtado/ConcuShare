@@ -2,14 +2,25 @@
 
 Semaforo::Semaforo (const char* nombre,int valorInicial ) {
 	key_t clave = ftok ( nombre,'a' );
-	this->id = semget ( clave, 1, 00770 | IPC_CREAT );
+	this->id = semget ( clave, 1, 00770 | IPC_CREAT | IPC_EXCL);
+	
+	if((this->id == -1) && (errno == EEXIST)) { //ya existe el conjunto, no inicializo
+		this->id = semget ( clave, 1, 00770 | IPC_CREAT);
+		return;
+	}
+	
 	inicializar(0, valorInicial);
 }
 
 
 Semaforo::Semaforo ( const char* nombre, int cantidadSemaforos, int *valoresIniciales ) {
 	key_t clave = ftok ( nombre,'a' );
-	this->id = semget ( clave, cantidadSemaforos, 00770 | IPC_CREAT );
+	this->id = semget ( clave, cantidadSemaforos, 00770 | IPC_CREAT | IPC_EXCL);
+	
+	if((this->id == -1) && (errno == EEXIST))  { //ya existe el conjunto, no inicializo
+		this->id = semget ( clave, cantidadSemaforos, 00770 | IPC_CREAT);
+		return;
+	}
 	
 	for(int i = 0; i < cantidadSemaforos; i++)
 		inicializar(i, valoresIniciales[i]);

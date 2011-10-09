@@ -102,8 +102,7 @@ class ParserComandos {
 		 */
 		char *armarSolicitarTransf(TCOM comando, TPID pidSolicitante, 
 		TPID pidDuenio, std::string &pathArchivo, std::string &pathDestino);
-		
-		
+				
 		/* metodo para obtener el tamaño en bytes del comando para 
 		 * compartir/descompartir un archivo.
 		 * path: path del archivo a compartir/descompartir

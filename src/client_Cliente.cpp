@@ -8,6 +8,7 @@ Cliente::Cliente(){
   this->fifoEscritura = new Fifo(NOMBREFIFOSERVIDOR);
   this->semEscritura = new Semaforo( (const char*) NOMBREFIFOSERVIDOR, 0);
 	this->estaConectado = false;
+	this->listaHijos = new list<TPID>();
 }
 
 Cliente::~Cliente() {
@@ -17,6 +18,12 @@ Cliente::~Cliente() {
 		delete this->fifoLectura;
   delete this->fifoEscritura;
 	delete this->semEscritura;
+	
+	list<TPID>::iterator it = this->listaHijos->begin();
+	for(; it != this->listaHijos->end(); it++)
+		waitpid(*it, NULL, 0);
+	
+	delete this->listaHijos;
 }
 
 void Cliente::conectarAlServidor(){
@@ -142,7 +149,30 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 	// El archivo existe!!!!, podemos comenzar la transferencia
 	cout << "Debería transmitir el archivo!!" << endl;
 	// USAR parser.armarSolicitarTransf.......
-	//this->escribirMensajeAlServidor(PEDIRARCH,  
+	
+	char *copiaNombre = new char[sharePath.size() + 1];
+	memcpy((void *) copiaNombre, (void *) sharePath.c_str(), sharePath.size());
+	copiaNombre[sharePath.size()] = 0;
+	string nombreBaseArchivo(basename(copiaNombre));
+	string nombreCompletoDest(destPath + "/" + nombreBaseArchivo);
+	delete [] copiaNombre;
+	cout << "Nombre completo archivo destino: " << nombreCompletoDest << ", nombre origen: " << sharePath << endl;
+	
+	TPID pidProceso = getpid();
+	ParserComandos parser;
+	char *comando = parser.armarSolicitarTransf(PEDIRARCH, pidProceso, pid, sharePath, nombreCompletoDest);
+	
+	
+	TPID pidHijo = fork();	
+	if(pidHijo == 0) { // es el hijo
+		execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), 0);
+	}
+	this->listaHijos->push_back(pidHijo);
+	
+	// Incremento al semáforo para desbloquear al fifo del servidor
+    this->semEscritura->v();
+	this->fifoEscritura->escribir(comando, parser.obtenerTamanioSolicitarTransf(sharePath, nombreCompletoDest));
+	
     return 0;
 }
 
