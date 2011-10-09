@@ -5,7 +5,8 @@
 #include "fifo.h"
 #include "Cliente.h"
 #include <sys/stat.h>
-
+#include "logger.h"
+#include <sstream>
 
 using namespace std;
 
@@ -109,9 +110,13 @@ void descargarArchivo() {
 void errorClienteNoConectado() {
 	cout << "Debe conectarse al servidor para realizar alguna tarea" << endl;
 }
-	
 
-int main() {
+void initLog(std::string logfile){
+    Logger::setLogFile(logfile);
+    Logger::open();
+}
+
+int main(int argc,char** argv) {
 	int opcion = 1;
 	char buffer[1000];
 	string path;
@@ -119,8 +124,18 @@ int main() {
 	map<TPID, ListaPaths*> *mapaCompartidos = NULL;
 	registrarSignalTerm();
 	bool continua = true;
+    
+    //Inicializacion Logger
+    if(argc>1){
+        if(strcmp(argv[1],"--debug")==0){
+            stringstream ss;
+            ss<<"cliente"<<getpid()<<".log";
+            initLog(ss.str());
+        }
+    }
+    Logger::log("Iniciando Cliente.");
 
-	while(continua) {
+    while(continua) {
 		// Imprimo el menú del programa
 		FILE* fd = fopen("MenuCliente.txt", "r");
 		do {
@@ -149,7 +164,8 @@ int main() {
 			}	
 			if(solicitarPath(path, "compartir")) {
 				cout << "El path del archivo a compartir no existe" << endl;
-				break;
+                Logger::log("Error al compartir "+path+", el archivo no existe.");
+                break;
 			}
 			cliente->compartirArchivo(path);
 			break;
@@ -162,6 +178,7 @@ int main() {
 			}
 			if(solicitarPath(path, "dejar de compartir")) {
 				cout << "El path del archivo a descompartir no existe" << endl;
+                Logger::log("Error al dejar de compartir "+path+", el archivo no existe.");
 				break;
 			}
 			cliente->dejarDeCompartirArchivo(path);
@@ -189,6 +206,7 @@ int main() {
 			if(cliente)
 				delete cliente;
 			continua = false;
+            Logger::close();
 			break;
 
 		default:
