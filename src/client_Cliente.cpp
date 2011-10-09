@@ -1,6 +1,7 @@
 #include "Cliente.h"
 #include <iostream>
 #include <sstream>
+#include "logger.h"
 using namespace std;
 
 Cliente::Cliente(){
@@ -28,16 +29,31 @@ void Cliente::conectarAlServidor(){
     ss << "fifo" << getpid();
     this->fifoLectura = new Fifo(ss.str().c_str());
     this->escribirMensajeAlServidor(ALTA, "");
-    char buffer[100];
+    /*char buffer[100];
     int bytesLeidos = this->fifoLectura->leer(buffer, 100);
-		buffer[bytesLeidos] = '\0';
-	
+	buffer[bytesLeidos] = '\0';
+	*/
+    char buffer[100];
+    this->recibirMensajeDelServidor(buffer,100);
     if(strcmp(buffer,ALTAOK) == 0) {
     	cout << "Conexión realizada con éxito" << endl;
+        Logger::log("Conexión realizada con éxito.");
 			this->estaConectado = true;
     }
+    stringstream ss2;
+    ss2<<buffer;
+    Logger::log("Recibido mensaje del servidor: "+ss2.str());
     
 }
+
+void Cliente::recibirMensajeDelServidor(char* buffer,int bufsize){
+    int bytesLeidos = this->fifoLectura->leer(buffer, bufsize);
+	buffer[bytesLeidos] = '\0';
+    stringstream ss;
+    ss<<buffer;
+    Logger::log("Recibido mensaje del servidor: "+ss.str());
+}
+
 
 void Cliente::desconectar() {
 	char buffer[100];
@@ -139,10 +155,6 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 		return -2;
 	}
 	
-	// El archivo existe!!!!, podemos comenzar la transferencia
-	cout << "Debería transmitir el archivo!!" << endl;
-	// USAR parser.armarSolicitarTransf.......
-	//this->escribirMensajeAlServidor(PEDIRARCH,  
     return 0;
 }
 
@@ -167,5 +179,9 @@ int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
     this->semEscritura->v();
     this->fifoEscritura->escribir(msj, sizeof(TCOM) + sizeof(TPID) + longMensaje);
     // Libero la memoria de la fifo
+
+    stringstream ss;
+    ss<<pid<<tipo<<mensaje;
+    Logger::log("Enviado el mensaje: "+ss.str());
     return 0;
 }

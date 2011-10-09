@@ -34,6 +34,7 @@ class Cliente{
  				 *       cliente pid.
  				 */
 				int empezarTransferencia(string destPath, string sharePath, TPID pid);
+        void recibirMensajeDelServidor(char* buffer,int bufsize);
 };
 
 #endif
