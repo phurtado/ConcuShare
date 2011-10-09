@@ -83,7 +83,6 @@ map<TPID,ListaPaths*>* Cliente::getCompartidos(){
     escribirMensajeAlServidor(LISTACOMP,"");
     this->fifoLectura->leer(buffer,BUFSIZE);
     memcpy((void *) &tamLista, (void *) buffer, sizeof(size_t));
-    
     if(tamLista > BUFSIZE) {
 		bufDef = new char[tamLista];
 		memcpy((void *) bufDef, (void *) buffer, BUFSIZE);
