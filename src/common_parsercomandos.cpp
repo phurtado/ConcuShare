@@ -86,8 +86,8 @@ char* ParserComandos::armarCompDescomp(TCOM comando, TPID pid, std::string &path
 	return comandoSerializado;
 }
 
-char *armarSolicitarTransf(TCOM comando, TPID pidSolicitante, TPID pidDuenio, 
-							std::string &pathArchivo, std::string &pathDestino) {
+char *ParserComandos::armarSolicitarTransf(TCOM comando, TPID pidSolicitante, TPID pidDuenio, 
+							string &pathArchivo, string &pathDestino) {
 	size_t tamPathArch = pathArchivo.size();
 	size_t tamPathDest = pathDestino.size();
 	char *comandoSerializado = new char[2 * sizeof(TPID) + sizeof(TCOM) + 

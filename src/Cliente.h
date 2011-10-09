@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <libgen.h>
 #include "common.h"
 #include "fifo.h"
 #include "Semaforo.h"
@@ -15,6 +16,7 @@ class Cliente{
         Fifo *fifoLectura;
 				Semaforo* semEscritura;
 				bool estaConectado;
+		std::list<TPID> *listaHijos;
         
     public:
         Cliente();

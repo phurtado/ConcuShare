@@ -19,7 +19,6 @@ int Servidor::leerComando(ParserComandos &parser) {
 	// algún cliente le escriba algo
 	this->semLectura->p();
 	
-	
 	int res = this->fifoLectura->leer(this->buffer, BUFSIZE), i = 2;
 	
 	if(res < 0)
@@ -173,17 +172,16 @@ int Servidor::descompartirArchivo(string &pathArchivo, TPID pidCliente) {
 
 int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino, 
 				TPID pidClienteDestino, TPID pidClienteDuenioArchivo) {
-	cout << "transferencia desde " << pidClienteDuenioArchivo << 
+	cout << "Transferencia desde " << pidClienteDuenioArchivo << 
 				" hasta " << pidClienteDestino << 
 				" el archivo " << pathArchivo << " al archivo " << 
 				pathDestino << endl;
 	
 	TPID pid = fork();
-	
 	if(pid == 0) { // es el hijo
-		execl("./transf", "transf", "-E", pathArchivo.c_str(), pathDestino.c_str(), 0);
+		execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), 0);
 	}
-	
+	this->listaHijos->push_back(pid);
 	return 0;
 }
 
