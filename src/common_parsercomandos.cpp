@@ -117,7 +117,6 @@ map<TPID, ListaPaths*>* ParserComandos::obtenerListaCompartidos() {
 	unsigned int tamanioLista;
 	TPID pidCliente;
 	char *posicionActual = this->buffer;
-	
 	// recupero el tamanio total de la lista
 	memcpy((void *) & tamanioLista, (void *) posicionActual, sizeof(size_t));
 	posicionActual += sizeof(size_t);
