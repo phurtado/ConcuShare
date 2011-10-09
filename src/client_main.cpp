@@ -203,8 +203,6 @@ int main(int argc,char** argv) {
 			break;
 
 		case 7:
-			if(cliente)
-				delete cliente;
 			continua = false;
             Logger::close();
 			break;
@@ -214,6 +212,8 @@ int main(int argc,char** argv) {
 			break;
 			}
 	}
+	if(cliente)
+		delete cliente;
 	
 	return 0;
 }

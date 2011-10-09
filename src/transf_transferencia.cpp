@@ -74,6 +74,7 @@ int Transferencia::recibir() {
 	// bloqueo la lectura
 	this->semaforos->p(SEMLEER);
 	BufferMem b = this->memoriaCompartida->leer();
+	cout << "Leo: " << b.getBuffer() << endl;
 	streampos pos = b.getTamEscrito();
 	this->bytesTransferidos += pos;
 	// desbloqueo la escritura
