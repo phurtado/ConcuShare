@@ -37,21 +37,26 @@
 			\emph{Makefile} que se encagar\'a de realizar el proceso de compilaci\'on. \\
 			\indent Para compilar la aplicaci\'on servidor se debe ingresar el siguiente comando:
 			\begin{verbatim}
-				make server
+				$ make server
 			\end{verbatim}
 			\indent Para compilar la aplicaci\'on cliente se debe ingresar el siguiente comando:
 			\begin{verbatim}
-				make client
+				$ make client
 			\end{verbatim}
 			\indent Para compilar la aplicaci\'on que se encarga de realizar las transferencias, se debe ingresar el siguiente comando:
 			\begin{verbatim}
-				make transf
+				$ make transf
 			\end{verbatim}
 			\indent En el caso de que desee compilar todas las aplicaciones juntas puede hacerlo por medio de alguno de los siguientes comandos:
 			\begin{verbatim}
-				make server client transf
-				make all
+				$ make server client transf
+				$ make all
 			\end{verbatim}
+
+		Para correr la aplicaci\'on servidor o cliente en modo debug, se debe agregar el par\'ametro \emph{--debug} como se muestra a continuaci\'on:
+		\begin{verbatim}
+			$ ./server --debug
+		\end{verbatim}
 
 		\subsection{Casos de Uso}
 
@@ -93,4 +98,112 @@
 			\end{itemize}
 
 		\subsection{Comunicaci\'on entre Procesos}
+			A continuaci\'on se detalla como es la comunicaci\'on entre los procesos que componen a \emph{ConcuShare}, seg\'un los casos de uso:
+			\begin{itemize}
+				\item \textbf{Alta:}	
+					\begin{itemize}
+						\item El servidor y un cliente se comunican.
+						\item El cliente env\'ia un mensaje al servidor pidiendo conectarse.
+						\item El servidor da de alta al cliente en el caso de que no est\'e conectado. Informa esto por medio de 
+									otro mensaje.
+					\end{itemize}
+				\item \textbf{Baja:}	
+					\begin{itemize}
+						\item El servidor y un cliente se comunican.
+						\item El cliente env\'ia un mensaje al servidor pidiendo desconectarse.
+						\item El servidor da de baja al cliente en caso de que no est\'e conectado. Informa esto por medio de
+									otro mensaje.
+					\end{itemize}
+				\item \textbf{Compartir Archivo:}	
+					\begin{itemize}
+						\item El servidor y un cliente se comunican.
+						\item El cliente env\'ia un mensaje al servidor para compartir un archivo.
+						\item El servidor recibe el mensaje y contesta al cliente pidiendo el path completo del
+									archivo a compartir.
+						\item El cliente env\'ia el path al servidor y este lo almacena en la lista de compartidos. 
+					\end{itemize}
+				\item \textbf{Descompartir Archivo:} 
+					\begin{itemize}
+						\item El servidor y un cliente se comunican.
+						\item El cliente env\'ia un mensaje al servidor para descompartir un archivo.
+						\item El servidor recibe el mensaje y contesta al cliente pidiendo el path completo del
+								archivo a descompartir.
+						\item El cliente env\'ia el path al servidor y este elimina al mismo de su lista de compartidos
+								si es que el usuario estaba compartiendo ese archivo.
+					\end{itemize}
+				\item \textbf{Descargar Archivo:}
+					\begin{itemize}
+						\item El servidor y un cliente se comunican a trav\'es del proceso Transferidor.
+						\item El cliente env\'ia un mensaje al servidor pidiendo descargar un archivo.
+						\item El servidor recibe el mensaje y contesta al cliente pidiendo el path completo del 
+									archivo a descargar, el pid del cliente que posee el archivo y un path de destino
+									donde almacenar el archivo.
+						\item El cliente env\'ia esta informaci\'on al servidor y llama al proceso Transferidor para
+									recibir el archivo.
+						\item El servidor recibe la informaci\'on del cliente y llama al proceso Transferidor para
+									enviar el archivo.
+						\item El proceso Transferidor se encarga de transferir el archivo y al terminar esta operaci\'ion 
+									informa y al servidor y al cliente el estado de la misma.
+					\end{itemize}
+				
+				\item \textbf{Obtener Lista de Archivos Compartidos:}
+					\begin{itemize}
+						\item El servidor y un cliente se comunican.
+						\item El cliente env\'ia un mensaje al servidor pidi\'endole la lista de archivos compartidos.
+						\item El servidor le responde envi\'andole la lista de archivos compartidos serializada.
+					\end{itemize}
+			\end{itemize}
+
+	\subsection{Problemas Conocidos de Concurrencia en el Trabajo}
+	Prrr....
+
+	\subsection{Mecanismos de Concurrencia Utilizados}
+		A continuaci\'on se exhiben los mecanismos de concurrencia utilizados en la comunicaci\'on entre los procesos:
+		\subsubsection{Env\'io de Mensajes entre Servidor y Cliente}
+			Los clientes se comunican con el servidor enviando mensajes con la tarea que desean realizar. Dado que el servidor 
+			debe responder al cliente sobre el estado de la operaci\'on realizada, los mecanismos posibles para establecer esta 
+			comunicaci\'on podr\'ian ser \emph{Fifos} o \emph{Memoria Compartida}. No se podr\'ia haber utilizado \emph{pipes} dado 
+			que el cliente deber\'ia ser hijo del servidor, cosa que no ocurre. \\
+			\indent Se decidi\'o utilizar \emph{Fifos} para establecer esta comunicaci\'on dado que los mensajes que env\'ia el cliente
+			tienen distintos tama\~nos seg\'un la tarea a realizar, y en algunos casos como a la hora de compartir archivos, var\'ian 
+			seg\'un la longitud del path del archivo compartido. \\ \\
+			\indent De esta forma, el servidor posee una \emph{Fifo} para recibir mensajes del cliente y cada cliente posee una \emph{Fifo}
+			para escribir mensajes al servidor. Con esta implementaci\'on surge un inconveniente: Una \emph{Fifo} es un mecanismo de 
+			concurrencia unidireccional que asegura el sincronismo entre procesos. Sin embargo, dado que todos los clientes conectados poseen
+			la \emph{Fifo} de lectura del servidor abierta, ya no existe sincronismo entre los procesos.  \\
+			\indent Para solucionar este problema, se agrega un sem\'aforo. Este sem\'aforo se encarga de bloquear al servidor mientras que no 
+			haya alg\'un cliente que intente escribir alg\'un mensaje. El cliente que desea escribir un mensaje incrementa el sem\'aforo y 
+			despierta al servidor para procesar el mensaje. \\ \\
+			\indent Los mensajes que el servidor env\'ia a cada cliente son entregados tambi\'en por medio de \emph{Fifos}. En este caso, el 
+			servidor posee una \emph{Fifo} por cada cliente que se encuentre conectado, por lo cual no existen problemas de sincronismo dado que
+			este mecanismo s\'olo es compartido entre el servidor y un cliente particular.
+
+			\subsubsection{Transferencia de Archivos}
+			Para realizar la transferencia de archivos se pod\'ia elegir nuevamente entre \emph{Fifos} y \emph{Memoria Compartida}. En este caso,
+			se eligi\'o el mecanismo de concurrencia de \emph{Memoria Compartida}. El motivo de esta elecci\'on es que de esta forma el archivo
+			compartido se escribe en memoria y no en un archivo en disco como se lo hace utilizando \emph{Fifos}. De esta forma, se mejora el 
+			rendimiento de la aplicaci\'on. \\
+			\indent Dado que el tama\~no del archivo puede llegar a ser muy grande, el archivo se escribe de forma particionada en la 
+			\emph{Memoria Compartida}. \\
+			\indent Para asegurar la sincronizaci\'on entre escrituras y lecturas, se emplean dos sem\'aforos. Un sem\'aforo bloquea 
+			la lectura de la \emph{Memoria}. Esto se requiere en caso de que otro proceso se encuentre escribiendo la misma. Al terminar
+			de escribir, el proceso desbloquea la \emph{Memoria Compartida} y el proceso que deseaba realizar una lectura se libera para
+			poder completarla. El otro sem\'aforo bloquea la escritura de la \emph{Memoria}. Esto se requiere en caso de que un proceso
+			se encuentre leyendo la memoria a la hora de que otro quiera escribirla. En este caso, el proceso que escribe se suspende 
+			hasta que el proceso que lee incremente el sem\'aforo, lo cual se da cuando termina de leer.
+			
+
+			\subsubsection{Escritura sobre el Logger} 
+				Al ejecutarse la aplicaci\'on en \emph{Modo Debug}, muchos procesos podr\'ian escribir el archivo al mismo tiempo. Esto
+			puede provocar que los mensajes se mezclen entre s\'i y el archivo de log quede ilegible.
+			Para solucionar este inconveniente, se agrega un lock de escritura sobre el archivo de log cada vez que un proceso logea
+			alg\'un mensaje. El mismo se retira al terminarse la escritura sobre el mismo, dejando que cualquier otro proceso pueda 
+			escribir otro mensaje.
+
+			
+			
+		
+		
+
+				
 \end{document}
