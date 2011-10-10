@@ -64,8 +64,8 @@ void Cliente::desconectar() {
 	char buffer[100];
 	if(this->estaConectado == true) {
 		this->estaConectado = false;
-		if(this->escribirMensajeAlServidor(BAJA, "") > 0)
-			recibirMensajeDelServidor(buffer, 100);
+		this->escribirMensajeAlServidor(BAJA, "");
+		recibirMensajeDelServidor(buffer, 100);
 		if(strcmp(buffer,BAJAOK) == 0) {
 			cout << "Desconexión realizada con éxito" << endl;
 			this->estaConectado = false;
