@@ -31,8 +31,15 @@ Cliente::~Cliente() {
 	delete this->semEscritura;
 	
 	list<TPID>::iterator it = this->listaHijos->begin();
-	for(; it != this->listaHijos->end(); it++)
+	for(; it != this->listaHijos->end(); it++) {
+		stringstream ss;
+		ss << "Esperando por " << *it << endl;
+		Logger::log(ss.str());
 		waitpid(*it, NULL, 0);
+		ss.str("");
+		ss << "Listo" << endl;
+		Logger::log(ss.str());
+	}
 	
 	delete this->listaHijos;
 }
@@ -151,7 +158,12 @@ string Cliente::crearNombreDestino(string &sharePath, string &destPath) {
 	return nombreCompletoDest;
 }
 
-int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
+int Cliente::validarArchivoCompartido(TPID pid, string &pathOrigen, string &pathDestino) {
+	if(pid == getpid()) {
+		cout << "Error: el pid es el del proceso actual." << endl;
+		return -4;
+	}
+	
 	// Le pido al servidor la lista de archivos compartidos y valido
 	// que sharePath y pid sean válidos
 	map< TPID, ListaPaths* >* hash = this->getCompartidos(); 
@@ -166,15 +178,24 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 	// pide el cliente.
 	ListaPaths::iterator itL = itM->second->begin();
 	for (; itL != itM->second->end(); itL++) {
-		if ( *itL == sharePath ) 
+		if ( pathOrigen.compare(*itL) == 0 ) 
 			break;
 	}
-		
+	
 	if ( itL == itM->second->end()) {
 		// El archivo compartido no existe...
-		cout << "El cliente con el pid: " << pid << " no está compartiendo el archivo " << sharePath << endl;
+		cout << "El cliente con el pid: " << pid << " no está compartiendo el archivo " << pathOrigen << endl;
 		return -2;
 	}
+	
+	return 0;
+}
+
+int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
+	
+	int res;
+	if((res = validarArchivoCompartido(pid, sharePath, destPath)))
+		return res;
 	
 	string nombreCompletoDest = crearNombreDestino(sharePath, destPath);
 	
@@ -191,7 +212,7 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 		cout << "Error en la transferencia del archivo " << sharePath << endl;
 	else {
 		if(existeArchivo(nombreCompletoDest)) {
-			cout << "Error: el archivo destino " << destPath << " ya existe. No se realiza la transferencia." << endl;
+			cout << "Error: el archivo destino " << nombreCompletoDest << " ya existe. No se realiza la transferencia." << endl;
 			return -3;
 		}
 		crearHijoReceptor(sharePath, nombreCompletoDest, pid);
@@ -204,15 +225,14 @@ int Cliente::crearHijoReceptor(string &pathOrigen, string &pathDestino, TPID pid
 	TPID pidHijo = fork();	
 	if(pidHijo == 0) { // es el hijo
 		if(Logger::isOpen()){ //si se abrió el cliente en modo debug, las transferencias asociadas también se ejecutarán en modo debug 
-                execl("./transf", "transf", "R", pathOrigen.c_str(), pathDestino.c_str(), "--debug", 0);
+                execl("./transf", "transf", "R", pathOrigen.c_str(), pathDestino.c_str(), "--debug", NULL);
             }
             else{
-                execl("./transf", "transf", "R", pathOrigen.c_str(), pathDestino.c_str(), 0);
+                execl("./transf", "transf", "R", pathOrigen.c_str(), pathDestino.c_str(), NULL);
             } 
 		}
 		else if(pidHijo > 0) {
 			this->listaHijos->push_back(pidHijo);
-			cout << "Procesando transferencia." << endl;
             stringstream ss;
             ss<<"Ejecutando proceso (PID "<<pidHijo<<") de recepción desde el proceso con PID "<<
             pid<<" hasta "<<getpid()<<" del archivo "<<pathOrigen<<" al archivo "<<pathDestino<<"."<<endl;

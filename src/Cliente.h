@@ -20,6 +20,7 @@ class Cliente{
 		
         string crearNombreDestino(string &sharePath, string &destPath);
 		int crearHijoReceptor(string &pathOrigen, string &pathDestino, TPID pid);
+		int validarArchivoCompartido(TPID pid, string &pathOrigen, string &pathDestino);
         
     public:
         /**
@@ -80,13 +81,17 @@ class Cliente{
          */
         int escribirMensajeAlServidor(TCOM tipo,std::string mensaje);
 		
+
         /** 
          * Inicia el proceso para la recepción de un archivo.
          * @param destPath Directorio de destino (sin nombre de archivo)
          * @param sharePath Ruta del archivo compartido que se quiere transferir (exactamente como aparece en la lista de compartidos)
          * @pid El pid del cliente que comparte el archivo solicitado
          * @pre{Los paths deben estar validados (solo existencia)}
-         * @return 0 en caso de éxito;-1 si el pid del cliente no existe; -2 si sharePath no está siendo compartido por el cliente pid.
+         * @return 0 en caso de éxito;	-1 si el pid del cliente no existe; 
+         * 								-2 si sharePath no está siendo compartido por el cliente pid.
+         * 								-3 si destPath existe previamente
+         * 								-4 si pid es el del cliente actual
          */
         int empezarTransferencia(string destPath, string sharePath, TPID pid);
         

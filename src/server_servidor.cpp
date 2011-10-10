@@ -179,17 +179,15 @@ int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino,
 				" hasta " << pidClienteDestino << 
 				" el archivo " << pathArchivo << " al archivo " << 
 				pathDestino << endl;
-
-    
+	
 	TPID pid = fork();
 	if(pid == 0) { // es el hijo
         if(Logger::isOpen()){ //si se abrió el cliente en modo debug, las transferencias asociadas también se ejecutarán en modo debug 
-            cout << "Ejecutando transf con log" << endl;
-            execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), "--debug", 0);
+            execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), "--debug", NULL);
+            cout << "Error en execl" << endl;
         }
         else{
-			cout << "Ejecutando transf sin log" << endl;
-            execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), 0);
+            execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), NULL);
         }
 	}
 	else if(pid == -1) { // error de fork, notifico al cliente del error, no hay transferencia
@@ -219,8 +217,15 @@ Servidor::~Servidor() {
 	
 	// espero por hijos que no terminaron todavia
 	list<TPID>::iterator itP = this->listaHijos->begin();
-	for(; itP != this->listaHijos->end(); itP++)
+	for(; itP != this->listaHijos->end(); itP++) {
+		stringstream ss;
+		ss << "Esperando por " << *itP << endl;
+		Logger::log(ss.str());
 		waitpid(*itP, NULL, 0);
+		ss.str("");
+		ss << "Listo" << endl;
+		Logger::log(ss.str());
+	}
 	
 	delete this->fifoLectura;
 	delete this->fifosEscritura;

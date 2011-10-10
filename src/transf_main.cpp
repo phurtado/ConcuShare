@@ -30,9 +30,7 @@ int main(int argc, char *argv[]) {
             initLog(ss.str());
         }
     }
-    Logger::log("Iniciando Servidor.");
 	
-    
     if(argc < 4) {
 		cerr << "Error. Numero de argumentos invalido." << endl;
 		return 0;
@@ -41,7 +39,6 @@ int main(int argc, char *argv[]) {
 	string pathOrigen(argv[2]), pathDestino(argv[3]), modo(argv[1]);
 	
 	int res = 0;
-	
 	if(! modo.compare("E")) {
 		Transferencia transf(pathOrigen, pathDestino, ENVIAR);
 		while((res = transf.enviar()) == 0)

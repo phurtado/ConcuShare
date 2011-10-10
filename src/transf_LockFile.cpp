@@ -1,10 +1,5 @@
 #include "LockFile.h"
 
-
-
-#include <iostream>
-using namespace std;
-
 LockFile :: LockFile ( const char* nombre, TMODO modo ) {
 
 	strcpy ( this->nombre,nombre );
@@ -13,16 +8,13 @@ LockFile :: LockFile ( const char* nombre, TMODO modo ) {
 		case LECTURA:
 			this->fd = open ( this->nombre,O_RDWR );
 			this->tipoLock = F_RDLCK;
-			cout << "FD: " << this->fd << " abierto como lectura." << endl;
 			break;
 		case ESCRITURA:
 			this->fd = open ( this->nombre,O_CREAT|O_WRONLY,0777 );
 			this->tipoLock = F_WRLCK;
-			cout << "FD: " << this->fd << " abierto como escritura." << endl;
 			break;
 	}
 	if(this->fd == -1)
-	cout << "Error OPEN!!! " << endl;
 	this->fl.l_whence = SEEK_SET;
 	this->fl.l_start = 0;
 	this->fl.l_len = obtenerTamanioArchivo();
@@ -54,7 +46,6 @@ int LockFile :: escribir ( char* buffer,int buffsize ) {
 
 int LockFile :: leer ( char* buffer, int buffsize ) {
 	int resultado = read ( this->fd,buffer,buffsize );
-	cout << "Leyendo del archivo: " << this->fd << " " << resultado << " bytes: " << buffer << endl;
 	return resultado;
 }
 
@@ -66,7 +57,6 @@ LockFile :: ~LockFile () {
 off_t LockFile::obtenerTamanioArchivo() {
 	off_t posActual = lseek(this->fd, 0, SEEK_CUR);
 	off_t tamArchivo = lseek(this->fd, 0, SEEK_END);
-	cout << "TamArchivo: lseek: " << tamArchivo << ", actual: " << posActual << endl;
 	lseek(this->fd, posActual, SEEK_SET);
 	
 	return tamArchivo;

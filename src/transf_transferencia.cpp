@@ -45,34 +45,25 @@ int Transferencia::enviar() {
 	}
 	
 	off_t posActual = this->archivo->leer(this->buffer.getBuffer(), BUFMEMSIZE);
-    ss.clear();
-    ss<<"Leidos de archivo: "<<this->buffer.getBuffer();
-    Logger::log(ss.str());
-	
-	if(posActual == 0) {
-		this->buffer.setFin(true);
-		posActual = this->longitudArchivo;
-	}
 	
 	this->buffer.setTamEscrito(posActual);
 	this->bytesTransferidos += posActual;
 	
 	// bloqueo la escritura hasta que se termine la lectura
 	this->semaforos->p(SEMESCR);
-    Logger::log("Escritura: Bloqueo escritura");
 	this->memoriaCompartida->escribir(buffer);
 	// desbloqueo la lectura
 	this->semaforos->v(SEMLEER);
 	
-    ss<<"Escritura: posActual: " << posActual;
+    ss<<"Escritura: Bytes leidos de archivo: " << posActual;
     Logger::log(ss.str());
     
-    ss<<"Tamaño del archivo: " << this->longitudArchivo;
-    Logger::log(ss.str());
+    ss.str("");
 	
-	bool llegueAlFin = posActual >= this->longitudArchivo;
+	bool llegueAlFin = this->bytesTransferidos >= this->longitudArchivo;
 	if(llegueAlFin) {
 		ss.clear();
+		ss.str("");
 		ss << "Liberando archivo " << pathOrigen << endl;
 		Logger::log(ss.str());
 		archivo->liberarLock();
@@ -90,7 +81,7 @@ int Transferencia::recibir() {
 		ss.clear();
 	}
 	
-    Logger::log("Lectura: Bloqueo lectura ");
+    //Logger::log("Lectura: Bloqueo lectura ");
 	// bloqueo la lectura
 	this->semaforos->p(SEMLEER);
 	BufferMem b = this->memoriaCompartida->leer();
@@ -99,20 +90,22 @@ int Transferencia::recibir() {
 	this->bytesTransferidos += pos;
 	// desbloqueo la escritura
 	this->semaforos->v(SEMESCR);
-    Logger::log("Lectura: terminada.");
-	//escritura.write(b.getBuffer(), b.getTamEscrito());
+    //Logger::log("Lectura: terminada.");
 	archivo->escribir(b.getBuffer(), b.getTamEscrito());
 	
     stringstream ss2;
     ss2 << "Lectura: Tamaño del Archivo: " << b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos;
     Logger::log(ss2.str());
-    
     bool archivoCompleto = this->bytesTransferidos >= b.getTamArchivo();
     if(archivoCompleto) {
 		ss.clear();
 		ss << "Liberando el archivo " << pathDestino << endl;
 		Logger::log(ss.str());
 		archivo->liberarLock();
+		ss.str("");
+    
+		ss<<"Tamaño del archivo: " << this->longitudArchivo;
+    Logger::log(ss.str());
 	}
     
 	return ((archivoCompleto) || (b.esFin())) ? 1 : 0;
