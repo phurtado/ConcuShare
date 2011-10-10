@@ -1,4 +1,6 @@
 #include "servidor.h"
+#include <sstream>
+#include "logger.h"
 
 Servidor::Servidor() {
 	this->fifoLectura = new Fifo(NOMBREFIFOSERVIDOR);
@@ -177,20 +179,28 @@ int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino,
 				" hasta " << pidClienteDestino << 
 				" el archivo " << pathArchivo << " al archivo " << 
 				pathDestino << endl;
-	
+
+    
 	TPID pid = fork();
 	if(pid == 0) { // es el hijo
-		execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), 0);
+        if(Logger::isOpen()){ //si se abrió el cliente en modo debug, las transferencias asociadas también se ejecutarán en modo debug 
+            execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), "--debug", 0);
+        }
+        else{
+            execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), 0);
+        }
 	}
 	else if(pid == -1) { // error de fork, notifico al cliente del error, no hay transferencia
 		(*this->fifosEscritura)[pidClienteDestino]->escribir((char*) TRERROR, strlen(TROK));
 		return -1;
 	}
-	else
+	else{
 		(*this->fifosEscritura)[pidClienteDestino]->escribir((char*) TROK, strlen(TROK));
-	
-	this->listaHijos->push_back(pid);
-	
+	    this->listaHijos->push_back(pid);
+	    stringstream ss;
+        ss<<"Ejecutando proceso de transferencia con PID "<<pid<<" desde "<<pidClienteDuenioArchivo<<" hasta "<<pidClienteDestino<<" del archivo "<<pathArchivo<<" al archivo "<<pathDestino<<"."<<endl;
+        Logger::log(ss.str());
+    }
 	return 0;
 }
 

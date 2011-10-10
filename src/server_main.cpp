@@ -2,6 +2,8 @@
 #include <signal.h>
 #include "servidor.h"
 #include "parsercomandos.h"
+#include "logger.h"
+#include <sstream>
 
 using namespace std;
 
@@ -22,13 +24,31 @@ void registrarSignalInt() {
 	sigaction(SIGINT, &sa, NULL);
 }
 
-int main() {
+void initLog(std::string logfile){
+    Logger::setLogFile(logfile);
+    Logger::open();
+}
+
+int main(int argc,char** argv) {
 	cout << "Servidor escuchando peticiones de clientes..." << endl;
+
+    //Inicializacion Logger
+    if(argc>1){
+        if(strcmp(argv[1],"--debug")==0){
+            stringstream ss;
+            ss<<"server"<<getpid()<<".log";
+            initLog(ss.str());
+        }
+    }
+    Logger::log("Iniciando Servidor.");
+
+
 	s = new Servidor();
 	registrarSignalInt();
 	s->escucharComandos();
 	if(s)
 		delete s;
 	
+    Logger::close();
 	return 0;
 }

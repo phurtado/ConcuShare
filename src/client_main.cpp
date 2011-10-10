@@ -206,6 +206,6 @@ int main(int argc,char** argv) {
 	
 	if(cliente)
 		delete cliente;
-	
+    Logger::close();	
 	return 0;
 }

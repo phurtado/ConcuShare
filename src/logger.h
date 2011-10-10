@@ -1,5 +1,6 @@
-#ifndef LOGG_H_
-#define LOGG_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
+
 #include <iostream>
 #include <fstream>
 class Logger{
@@ -15,6 +16,4 @@ class Logger{
         static bool isOpen();
 };
 
-
-
-#endif /* LOGG_H_  */
+#endif

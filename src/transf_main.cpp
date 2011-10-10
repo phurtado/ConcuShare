@@ -2,8 +2,15 @@
 
 #include "common.h"
 #include "transferencia.h"
-
+#include "logger.h"
+#include <sstream>
+#include <cstring>
 using namespace std;
+
+void initLog(std::string logfile){
+    Logger::setLogFile(logfile);
+    Logger::open();
+}
 
 /* Argumentos:
  * 1 - E o R
@@ -14,8 +21,18 @@ using namespace std;
  */
 
 int main(int argc, char *argv[]) {
-	
-	if(argc != 4) {
+	//Inicializacion Logger
+    if(argc == 5){
+        if(strcmp(argv[4],"--debug")==0){
+            stringstream ss;
+            ss<<"transf"<<getpid()<<".log";
+            initLog(ss.str());
+        }
+    }
+    Logger::log("Iniciando Servidor.");
+
+    
+    if(argc < 4) {
 		cerr << "Error. Numero de argumentos invalido." << endl;
 		return 0;
 	}

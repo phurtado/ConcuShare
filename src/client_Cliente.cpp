@@ -170,7 +170,6 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 	ParserComandos parser;
 	char *comando = parser.armarSolicitarTransf(PEDIRARCH, pidProceso, pid, sharePath, nombreCompletoDest);
 	
-	
 	// Incremento al semáforo para desbloquear al fifo del servidor
     this->semEscritura->v();
 	this->fifoEscritura->escribir(comando, parser.obtenerTamanioSolicitarTransf(sharePath, nombreCompletoDest));
@@ -182,12 +181,20 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 	else {
 		TPID pidHijo = fork();	
 		if(pidHijo == 0) { // es el hijo
-			execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), 0);
+			if(Logger::isOpen()){ //si se abrió el cliente en modo debug, las transferencias asociadas también se ejecutarán en modo debug 
+                execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), "--debug", 0);
+            }
+            else{
+                execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), 0);
+            } 
 		}
 		else if(pidHijo > 0) {
 			this->listaHijos->push_back(pidHijo);
 			cout << "Procesando transferencia." << endl;
-		} else
+            stringstream ss;
+            ss<<"Ejecutando proceso (PID "<<pidHijo<<") de recepción desde el proceso con PID "<<pid<<" hasta "<<pidProceso<<" del archivo "<<sharePath<<" al archivo "<<nombreCompletoDest<<"."<<endl;
+            Logger::log(ss.str());
+        } else
 			cout << "Error en la transferencia del archivo " << sharePath << endl;
 	}
 	
