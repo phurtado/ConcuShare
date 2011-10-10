@@ -26,6 +26,10 @@ typedef pid_t TPID;
 #define COMPERROR "-1\0"
 #define DESCOMPOK "0\0"
 #define DESCOMPERROR "-1\0"
+#define TROK "0\0"
+#define TRERROR "-1\0"
+
+void buscarHijosQueTerminaron(std::list< TPID > *lista);
 
 
 #endif

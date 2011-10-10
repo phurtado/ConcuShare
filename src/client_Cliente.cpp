@@ -15,8 +15,10 @@ Cliente::Cliente(){
 Cliente::~Cliente() {
   if(this->estaConectado)
 		this->desconectar();
-  if(this->fifoLectura)
+  if(this->fifoLectura) {
+		this->fifoLectura->cerrar();
 		delete this->fifoLectura;
+	}
   delete this->fifoEscritura;
 	delete this->semEscritura;
 	
@@ -29,6 +31,7 @@ Cliente::~Cliente() {
 
 void Cliente::conectarAlServidor(){
     stringstream ss;
+    char buffer[100];
     if(this->estaConectado) {
     	cout << "Ya se encuentra conectado al servidor" << endl;
     	return;
@@ -36,11 +39,6 @@ void Cliente::conectarAlServidor(){
     ss << "fifo" << getpid();
     this->fifoLectura = new Fifo(ss.str().c_str());
     this->escribirMensajeAlServidor(ALTA, "");
-    /*char buffer[100];
-    int bytesLeidos = this->fifoLectura->leer(buffer, 100);
-	buffer[bytesLeidos] = '\0';
-	*/
-    char buffer[100];
     this->recibirMensajeDelServidor(buffer,100);
     if(strcmp(buffer,ALTAOK) == 0) {
     	cout << "Conexión realizada con éxito" << endl;
@@ -66,9 +64,8 @@ void Cliente::desconectar() {
 	char buffer[100];
 	if(this->estaConectado == true) {
 		this->estaConectado = false;
-		this->escribirMensajeAlServidor(BAJA, "");
-		int bytesLeidos = this->fifoLectura->leer(buffer, 100);
-		buffer[bytesLeidos] = 0;
+		if(this->escribirMensajeAlServidor(BAJA, "") > 0)
+			recibirMensajeDelServidor(buffer, 100);
 		if(strcmp(buffer,BAJAOK) == 0) {
 			cout << "Desconexión realizada con éxito" << endl;
 			this->estaConectado = false;
@@ -147,7 +144,7 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 		cout << "El cliente con el pid: " << pid << " no se encuentra conectado" << endl;
 		return -1;
 	}
-
+	
 	// El cliente existe..., verifico si el mismo está compartiendo el archivo que
 	// pide el cliente.
 	ListaPaths::iterator itL = itM->second->begin();
@@ -168,28 +165,41 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 	string nombreBaseArchivo(basename(copiaNombre));
 	string nombreCompletoDest(destPath + "/" + nombreBaseArchivo);
 	delete [] copiaNombre;
-	cout << "Nombre completo archivo destino: " << nombreCompletoDest << ", nombre origen: " << sharePath << endl;
 	
 	TPID pidProceso = getpid();
 	ParserComandos parser;
 	char *comando = parser.armarSolicitarTransf(PEDIRARCH, pidProceso, pid, sharePath, nombreCompletoDest);
 	
 	
-	TPID pidHijo = fork();	
-	if(pidHijo == 0) { // es el hijo
-		execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), 0);
-	}
-	this->listaHijos->push_back(pidHijo);
-	
 	// Incremento al semáforo para desbloquear al fifo del servidor
     this->semEscritura->v();
 	this->fifoEscritura->escribir(comando, parser.obtenerTamanioSolicitarTransf(sharePath, nombreCompletoDest));
+	char buffer[100];
+	int bytesLeidos = this->fifoLectura->leer(buffer, 100);
+	buffer[bytesLeidos] = 0;
+	if(strcmp(buffer, TROK) != 0)
+		cout << "Error en la transferencia del archivo " << sharePath << endl;
+	else {
+		TPID pidHijo = fork();	
+		if(pidHijo == 0) { // es el hijo
+			execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), 0);
+		}
+		else if(pidHijo > 0) {
+			this->listaHijos->push_back(pidHijo);
+			cout << "Procesando transferencia." << endl;
+		} else
+			cout << "Error en la transferencia del archivo " << sharePath << endl;
+	}
 	
     return 0;
 }
 
 bool Cliente::conectado() {
 	return this->estaConectado;
+}
+
+list<TPID> *Cliente::getListaHijos() {
+	return this->listaHijos;
 }
 
 
@@ -209,7 +219,7 @@ int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
     this->semEscritura->v();
     this->fifoEscritura->escribir(msj, sizeof(TCOM) + sizeof(TPID) + longMensaje);
     // Libero la memoria de la fifo
-
+	cout << "Terminando escritura" << endl;
     stringstream ss;
     ss<<pid<<tipo<<mensaje;
     Logger::log("Enviado el mensaje: "+ss.str());

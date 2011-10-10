@@ -6,11 +6,10 @@
 using namespace std;
 
 Transferencia::Transferencia(string &pathOrigen, string &pathDestino) {
+	// creo el archivo
 	FILE *a = fopen(pathDestino.c_str(), "wb");
 	fclose(a);
-	//this->streamEscritura = new fstream();
-	//this->streamEscritura->open(this->pathDestino.c_str(), ios_base::out | ios_base::in);
-	//if(this->streamEscritura->fail()) cout << "FAILC" << endl;
+	
 	this->memoriaCompartida = new MemoriaCompartida<BufferMem>();
 	this->memoriaCompartida->crear(pathDestino.c_str(), LETRA);
 	this->pathOrigen = pathOrigen;
@@ -38,7 +37,7 @@ Transferencia::Transferencia(string &pathOrigen, string &pathDestino) {
 int Transferencia::enviar() {
 	
 	this->streamLectura->read(this->buffer.getBuffer(), BUFMEMSIZE);
-	cout << "Leidos de archivo: " << this->buffer.getBuffer() << endl;
+	//cout << "Leidos de archivo: " << this->buffer.getBuffer() << endl;
 	streampos posActual = this->streamLectura->tellg();
 	
 	if(posActual == EOF) {
@@ -49,18 +48,17 @@ int Transferencia::enviar() {
 	this->buffer.setTamEscrito(posActual - this->bytesTransferidos);
 	this->bytesTransferidos = posActual;
 	
-	cout << "Escritura: Bloqueo escritura" << endl;
+	//cout << "Escritura: Bloqueo escritura" << endl;
 	// bloqueo la escritura hasta que se termine la lectura
 	this->semaforos->p(SEMESCR);
-	cout << "Escritura: ENVIO: Voy a enviar, YA" << endl;
+	//cout << "Escritura: ENVIO: Voy a enviar, YA" << endl;
 	this->memoriaCompartida->escribir(buffer);
 	// desbloqueo la lectura
 	this->semaforos->v(SEMLEER);
 	
-	cout << "Escritura: YA envie" << endl;
-	cout << "Escritura: posActual: " << posActual << endl;
-	cout << "tamArch: " << this->longitudArchivo << endl;
-	
+	//cout << "Escritura: YA envie" << endl;
+	//cout << "Escritura: posActual: " << posActual << endl;
+	//cout << "tamArch: " << this->longitudArchivo << endl;
 	
 	return ((posActual >= this->longitudArchivo) or (posActual == EOF)) ? 1 : 0;
 }
@@ -70,19 +68,19 @@ int Transferencia::recibir() {
 	fstream escritura;
 	escritura.open(this->pathDestino.c_str(), fstream::binary | fstream::in | fstream::out | fstream::app);
 	
-	cout << "Lectura: Bloqueo lectura" << endl;
+	//cout << "Lectura: Bloqueo lectura" << endl;
 	// bloqueo la lectura
 	this->semaforos->p(SEMLEER);
 	BufferMem b = this->memoriaCompartida->leer();
-	cout << "Leo: " << b.getBuffer() << endl;
+	//cout << "Leo: " << b.getBuffer() << endl;
 	streampos pos = b.getTamEscrito();
 	this->bytesTransferidos += pos;
 	// desbloqueo la escritura
 	this->semaforos->v(SEMESCR);
-	cout << "Lectura: termine" << endl;
+	//cout << "Lectura: termine" << endl;
 	escritura.write(b.getBuffer(), b.getTamEscrito());
 	
-	cout << "Lectura: TamArch: " << b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos << endl;
+	//cout << "Lectura: TamArch: " << b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos << endl;
 	escritura.close();
 	return ((this->bytesTransferidos >= b.getTamArchivo()) || (b.esFin())) ? 1 : 0;
 }

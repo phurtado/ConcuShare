@@ -15,8 +15,10 @@ int Fifo :: escribir ( char *dato , int datoSize ) {
         if (this->fileDes == -1)
                    this->fileDes = open (this->nombre , O_WRONLY);
         // se escriben los datos en el fifo
-        int resultado = write (this->fileDes ,(const void*) dato, datoSize);
-        return resultado;
+        if(this->fileDes > 0)
+			return write (this->fileDes ,(const void*) dato, datoSize);
+		else
+			return 0;
 }
 
 int Fifo :: leer (char *buffer, int buffSize ) {
@@ -24,8 +26,10 @@ int Fifo :: leer (char *buffer, int buffSize ) {
         if (this->fileDes == -1 )
                    this->fileDes = open (this->nombre , O_RDONLY);
         // se leen los datos del fifo
-        int resultado = read(this->fileDes ,(void*) buffer , buffSize);
-        return resultado;
+        if(this->fileDes > 0)	
+			return read(this->fileDes ,(void*) buffer , buffSize);
+		else 
+			return 0;
 }
 
 void Fifo :: cerrar () {
@@ -33,4 +37,5 @@ void Fifo :: cerrar () {
 			close(this->fileDes);
 		
 		unlink(this->nombre);
+		this->fileDes = -2;
 }

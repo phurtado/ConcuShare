@@ -13,7 +13,8 @@ void handler_SIGINT(int sig) {
 	s = NULL;
 }
 
-void registrarSignalTerm() {
+
+void registrarSignalInt() {
 	struct sigaction sa;
 	sigemptyset(& sa.sa_mask);
 	sa.sa_handler = handler_SIGINT;
@@ -24,7 +25,7 @@ void registrarSignalTerm() {
 int main() {
 	cout << "Servidor escuchando peticiones de clientes..." << endl;
 	s = new Servidor();
-	registrarSignalTerm();
+	registrarSignalInt();
 	s->escucharComandos();
 	if(s)
 		delete s;

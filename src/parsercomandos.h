@@ -92,7 +92,7 @@ class ParserComandos {
 		 */
 		char* armarCompDescomp(TCOM comando, TPID pid, std::string &path);
 		
-		/*metodo para armar el comando de solicitar transferencia de archivo
+		/* metodo para armar el comando de solicitar transferencia de archivo
 		 * comando: idem armarCompDescomp
 		 * pidSolicitante: pid del cliente que solicita el archivo
 		 * pidDuenio: pid del cliente dueño del archivo

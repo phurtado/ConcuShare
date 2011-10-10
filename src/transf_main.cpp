@@ -14,31 +14,23 @@ using namespace std;
  */
 
 int main(int argc, char *argv[]) {
-	cout << "lala main transf" << endl;
+	
 	if(argc != 4) {
 		cerr << "Error. Numero de argumentos invalido." << endl;
 		return 0;
 	}
-		
-	for(int i = 0; i < argc; i++)
-		cout << "Arg " << i << " es " << argv[i] << endl;
 	
 	string pathOrigen(argv[2]), pathDestino(argv[3]), modo(argv[1]);
 	Transferencia transf(pathOrigen, pathDestino);
+	int res = 0;
 	
 	if(! modo.compare("E")) {
-		cout << "VOY A ENVIAR" << endl;
-		int res;
-		while((res = transf.enviar()) == 0)
-			cout << "Res = " << res << endl;
+		while((res = transf.enviar()) == 0);
 	}
 	
 	if(! modo.compare("R")) {
-		cout << "VOY A RECIBIR" << endl;
-		int res;
-		while((res = transf.recibir()) == 0)
-			cout << "Res = " << res << endl;
+		while((res = transf.recibir()) == 0);
 	}
 	
-	return 0;
+	return (res == 1) ? 0 : 1;
 }

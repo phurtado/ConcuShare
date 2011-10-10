@@ -47,6 +47,7 @@ void Servidor::escucharComandos() {
 	while(this->sigueEscuchando) {
 		if(leerComando(parser))
 			return;
+		buscarHijosQueTerminaron(this->listaHijos);
 		TCOM comando = parser.getComando();
 		TPID pidProceso = parser.getPid();
 		
@@ -75,7 +76,7 @@ void Servidor::escucharComandos() {
 				transferirArchivo(pathArchivo, pathDestino, pidProceso, pidClienteDuenio);
 				break;
 				default:
-					cout << "Comando incorrecto:" << comando << endl;
+					cout << "Comando incorrecto: " << comando << endl;
 		}
 	}
 }
@@ -181,9 +182,18 @@ int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino,
 	if(pid == 0) { // es el hijo
 		execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), 0);
 	}
+	else if(pid == -1) { // error de fork, notifico al cliente del error, no hay transferencia
+		(*this->fifosEscritura)[pidClienteDestino]->escribir((char*) TRERROR, strlen(TROK));
+		return -1;
+	}
+	else
+		(*this->fifosEscritura)[pidClienteDestino]->escribir((char*) TROK, strlen(TROK));
+	
 	this->listaHijos->push_back(pid);
+	
 	return 0;
 }
+
 
 Servidor::~Servidor() {
 	this->fifoLectura->cerrar();
@@ -195,6 +205,7 @@ Servidor::~Servidor() {
 	for(; itM != this->mapaPaths->end(); itM++)
 		delete itM->second;
 	
+	// espero por hijos que no terminaron todavia
 	list<TPID>::iterator itP = this->listaHijos->begin();
 	for(; itP != this->listaHijos->end(); itP++)
 		waitpid(*itP, NULL, 0);

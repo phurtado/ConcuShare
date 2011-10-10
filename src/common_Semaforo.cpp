@@ -35,7 +35,6 @@ int Semaforo::inicializar (int posSem, int valor) {
 		struct semid_ds* buf;
 		ushort* array;
 	};
-
 	semnum init;
 	init.val = valor;
 	int resultado = semctl ( this->id, posSem, SETVAL, init );

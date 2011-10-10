@@ -18,11 +18,8 @@ void handler_SIGINT(int sig) {
 	cliente = NULL;
 }
 
-void handler_SIGTERM(int sig) {
-	cout << "Terminé con SIGINT" << endl;
-}
 
-void registrarSignalTerm() {
+void registrarSignalInt() {
 	struct sigaction sa;
 	sigemptyset(& sa.sa_mask);
 	sa.sa_handler = handler_SIGINT;
@@ -30,13 +27,6 @@ void registrarSignalTerm() {
 	sigaction(SIGINT, &sa, NULL);
 }
 
-void registrarSignalTerm2() {
-	struct sigaction sa;
-	sigemptyset(& sa.sa_mask);
-	sa.sa_handler = handler_SIGTERM;
-	
-	sigaction(SIGTERM, &sa, NULL);
-}
 
 void mostrarListaCompartidos(map<TPID, ListaPaths*> *mapaCompartidos) {
 	map<TPID, ListaPaths*>::iterator itM = mapaCompartidos->begin();
@@ -122,7 +112,7 @@ int main(int argc,char** argv) {
 	string path;
 	cliente = new Cliente();
 	map<TPID, ListaPaths*> *mapaCompartidos = NULL;
-	registrarSignalTerm();
+	registrarSignalInt();
 	bool continua = true;
     
     //Inicializacion Logger
@@ -136,6 +126,7 @@ int main(int argc,char** argv) {
     Logger::log("Iniciando Cliente.");
 
     while(continua) {
+		buscarHijosQueTerminaron(cliente->getListaHijos());
 		// Imprimo el menú del programa
 		FILE* fd = fopen("MenuCliente.txt", "r");
 		do {
@@ -147,7 +138,7 @@ int main(int argc,char** argv) {
 		cout << endl << "Número de opción: ";
 		scanf("%s", buffer);
 		opcion = atoi(buffer);
-
+		
 		switch(opcion) {
 		case 1:
 			cliente->conectarAlServidor();
@@ -212,6 +203,7 @@ int main(int argc,char** argv) {
 			break;
 			}
 	}
+	
 	if(cliente)
 		delete cliente;
 	

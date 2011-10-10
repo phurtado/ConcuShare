@@ -29,6 +29,7 @@ class Cliente{
         int iniciarDescarga(std::string pathArchivo);
 				bool conectado();
         int escribirMensajeAlServidor(TCOM tipo,std::string mensaje);
+		
 				/* Pre: Los paths deben estar validados (solo existencia)
  				 * Post: Retorna 0 en caso de éxito. 
  				 *       Retorna -1 si el pid del cliente no existe.
@@ -37,6 +38,8 @@ class Cliente{
  				 */
 				int empezarTransferencia(string destPath, string sharePath, TPID pid);
         void recibirMensajeDelServidor(char* buffer,int bufsize);
+        std::list<TPID> *getListaHijos();
+        
 };
 
 #endif
