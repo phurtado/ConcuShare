@@ -7,14 +7,13 @@
 #include <string>
 #include <sys/wait.h>
 
-#define BUFSIZE 24
-/* BUFSIZE MINIMO = sizeof(TCOM) + sizeof(TPID) + 2 * sizeof(size_t) */
+#define BUFSIZE 24 ///< Tamaño de buffers. BUFSIZE MINIMO = sizeof(TCOM) + sizeof(TPID) + 2 * sizeof(size_t)
 
 #define NOMBREFIFOSERVIDOR "fifo_lectura"
 
 typedef enum {ALTA=561,BAJA=562,LISTACOMP=563,
-						COMPARCH=564,DESCOMPARCH=565,PEDIRARCH=566} TCOM;
-typedef std::list<std::string> ListaPaths;
+						COMPARCH=564,DESCOMPARCH=565,PEDIRARCH=566} TCOM; ///< Enumerado de tipos de mensajes para enviar por los fifos.
+typedef std::list<std::string> ListaPaths; ///< Lista de paths de archivos compartidos.
 typedef pid_t TPID;
 
 // Respuestas del servidor al cliente

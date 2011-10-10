@@ -27,27 +27,28 @@ class Transferencia {
 	
 	
 	public:
-	/* inicializa una transferencia.
-	 * pathOrigen: path del archivo origen el cual se enviara
-	 * pathDestino: path del archivo destino el cual se escribira
+	/**
+     * Inicializa una transferencia.
+	 * @param pathOrigen Path del archivo origen el cual se enviara
+	 * @param pathDestino Path del archivo destino el cual se escribira
 	 */
 	Transferencia(std::string &pathOrigen, std::string &pathDestino);
 	
-	/* metodo para enviar datos a la memoria compartida.
-	 * retorno: 
-	 * 0 si salio todo OK y hay mas datos para enviar
-	 * 1 si salio todo OK y no hay mas datos
+	/** 
+     * Envía datos a la memoria compartida.
+	 * @return 0 si salio todo OK y hay mas datos para enviar, 1 si salio todo OK y no hay mas datos
 	 */
 	int enviar();
 	
-	/* metodo para recibir datos desde la memoria compartida y escribirlos
-	 * en pathDestino.
-	 * 0 si salio todo OK y hay mas datos a recibir
-	 * 1 si salio todo OK y termino la transferencia
+	/**
+     * Recibe datos desde la memoria compartida y los escribe en pathDestino.
+	 * @return 0 si salio todo OK y hay mas datos a recibir, 1 si salio todo OK y termino la transferencia
 	 */
 	int recibir();
 	
-	/* Destructor de la Transferencia */
+	/**
+     * Destructor de la Transferencia.
+     */
 	virtual ~Transferencia();
 	
 

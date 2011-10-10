@@ -29,59 +29,76 @@ class Servidor {
 		int archivoCompartidoActualmente(std::string &pathArchivo);
 		
 	public:
-		/* Inicializa el servidor */
+		/** 
+         * Inicializa el servidor
+         */
 		Servidor();
 
-		/* Mediante este método el servidor se bloquea a la espera
-		 * de comandos de clientes que lleguen a traves de la fifo
-		 * de lectura */
+		/**
+         * Bloquea al servidor a la espera de comandos de clientes 
+         * que lleguen a través de la fifo de lectura.
+         */
 		void escucharComandos();
 
-		/* metodo para dar de alta a un cliente
-		 * pidCliente: pid del cliente a dar de alta
+		/**
+         * Da de alta a un cliente
+		 * @param pidCliente pid del cliente a dar de alta
+         * @return 0 en caso exitoso, -1 si hubo error.
 		 */
 		int altaCliente(TPID pidCliente);
 
-		/* metodo para dar de baja a un cliente
+		/**
+         * metodo para dar de baja a un cliente
 		 * pidCliente: pid del cliente a dar de baja
+         * @return 0 en caso exitoso, -1 en caso fallido.
 		 */
 		int bajaCliente(TPID pidCliente);
 
-		/* obtiene y escribe en la fifo del cliente cuyo PID es 
-		 * pidCliente la lista de archivos compartidos
-		 * pidCliente: cliente solicitante de la lista
+		/**
+         * Obtiene y escribe la lista de archivos compartidos 
+         * en la fifo de lectura de un cliente.
+		 * @param pidCliente Cliente solicitante de la lista
+         * @return 0 en caso exitoso, -1 en caso fallido. 
 		 */
 		int enviarListaCompartidosACliente(TPID pidCliente);
 
-		/* metodo para compartir un archivo
-		 * pathArchivo: string conteniendo el path del archivo a compartir
-		 * pidCliente: PID del cliente que quiere compartir el archivo
-		 */
+		/**
+         * Agrega un archivo a los compartidos.
+		 * @param pathArchivo String conteniendo el path del archivo a compartir
+		 * @param pidCliente PID del cliente que quiere compartir el archivo
+		 * @return 0 en caso de éxito, -1 si no encuentra el archivo entre los compartidos.
+         */
 		int compartirArchivo(std::string &pathArchivo, TPID pidCliente);
 
-		/* metodo para descompartir un archivo (borrarlo de la lista de
-		 * compartidos)
-		 * pathArchivo: string conteniendo el path del archivo a descompartir
-		 * pidCliente: PID del cliente que quiere descompartir el archivo
-		 */
+		/**
+         * Quita un archivo de la lista de compartidos.
+		 * @param pathArchivo string conteniendo el path del archivo a descompartir
+		 * @param PID del cliente que quiere descompartir el archivo
+		 * @return 0 en caso exitoso, -1 si falló el fork. 
+         */
 		int descompartirArchivo(std::string &pathArchivo, TPID pidCliente);
 
-		/* metodo para solicitar transferencia de un archivo, 
-		 * el serviror notidicara al cliente transmisor y este 
-		 * se encargara de la transferencia
-		 * pathArchivo: path del archivo requerido
-		 * pathDestino: path del archivo destino de la transferencia
-		 * pidClienteDestino: PID cliente que transmitira el archivo
+		/**
+         * Solicita la transferencia de un archivo, 
+		 * el servidor notificará al cliente transmisor y este 
+		 * se encargará de la transferencia.
+		 * @param pathArchivo Path del archivo requerido
+		 * @param pathDestino Path del archivo destino de la transferencia
+		 * @param pidClienteDestino PID cliente que transmitira el archivo
+         * @return 0 en caso exitoso, -1 en caso fallido.
 		 */
 		int transferirArchivo(std::string &pathArchivo, std::string &pathDestino, 
 				TPID pidClienteDestino, TPID pidClienteDuenioArchivo);
 		
-		/* destructor del Servidor */
+		/**
+         * Destructor del Servidor 
+         */
 		virtual ~Servidor();
 		
-		/* setea el indicador de continuacion de escucha de comandos
+		/**
+         * Setea el indicador de continuación de escucha de comandos
 		 * del servidor
-		 * continua: boolean indicando si continua (true) o no (false)
+		 * @param continua Boolean indicando si continua (true) o no (false)
 		 */  
         void setContinua(bool continua);
 
