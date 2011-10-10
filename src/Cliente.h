@@ -17,6 +17,9 @@ class Cliente{
         Semaforo* semEscritura;
         bool estaConectado;
 		std::list<TPID> *listaHijos; ///< Lista de procesos hijos del proceso cliente
+		
+        string crearNombreDestino(string &sharePath, string &destPath);
+		int crearHijoReceptor(string &pathOrigen, string &pathDestino, TPID pid);
         
     public:
         /**
