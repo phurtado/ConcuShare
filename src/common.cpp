@@ -10,5 +10,4 @@ void buscarHijosQueTerminaron(list< TPID > *lista) {
 		cout << "Hijo: " << pid << " terminado." << endl;
 		lista->remove(pid);
 	}
-	cout << "Res buscar: " << pid << endl;
 }

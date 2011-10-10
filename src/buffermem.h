@@ -2,7 +2,6 @@
 #define BUFFMEM_H_
 
 #include <stdlib.h>
-#include <fstream>
 
 /* tamano del buffer */
 #define BUFMEMSIZE 20
@@ -10,7 +9,7 @@
 class BufferMem {
 	private:
 		char buffer[BUFMEMSIZE];
-		std::streampos tamanoArchivo, bytesEscritos;
+		off_t tamanoArchivo, bytesEscritos;
 		bool esElFin;
 		
 	public:
@@ -22,13 +21,13 @@ class BufferMem {
 		 */
 		char *getBuffer();
 		
-		void setTamArchivo(std::streampos tam);
+		void setTamArchivo(off_t tam);
 
-		std::streampos getTamArchivo();
+		off_t getTamArchivo();
 		
-		void setTamEscrito(std::streampos tam);
+		void setTamEscrito(off_t tam);
 	
-		std::streampos getTamEscrito();
+		off_t getTamEscrito();
 		
 		bool esFin();
 

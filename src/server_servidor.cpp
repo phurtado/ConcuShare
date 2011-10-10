@@ -184,9 +184,11 @@ int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino,
 	TPID pid = fork();
 	if(pid == 0) { // es el hijo
         if(Logger::isOpen()){ //si se abrió el cliente en modo debug, las transferencias asociadas también se ejecutarán en modo debug 
+            cout << "Ejecutando transf con log" << endl;
             execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), "--debug", 0);
         }
         else{
+			cout << "Ejecutando transf sin log" << endl;
             execl("./transf", "transf", "E", pathArchivo.c_str(), pathDestino.c_str(), 0);
         }
 	}

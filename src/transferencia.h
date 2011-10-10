@@ -4,6 +4,7 @@
 #include "MemoriaCompartida.h"
 #include "buffermem.h"
 #include "Semaforo.h"
+#include "LockFile.h"
 #include <string>
 #include <fstream>
 
@@ -14,6 +15,8 @@
 #define SEMLEER 0
 #define SEMESCR 1
 
+typedef enum {ENVIAR, RECIBIR} TRMODO;
+
 
 class Transferencia {
 	private:
@@ -21,17 +24,17 @@ class Transferencia {
 	std::string pathOrigen, pathDestino;
 	Semaforo *semaforos;
 	BufferMem buffer;
-	std::ifstream *streamLectura;
-	std::streampos longitudArchivo, bytesTransferidos;
+	LockFile *archivo;
+	off_t longitudArchivo, bytesTransferidos;
 	
-	
+	TRMODO modo;
 	
 	public:
 	/* inicializa una transferencia.
 	 * pathOrigen: path del archivo origen el cual se enviara
 	 * pathDestino: path del archivo destino el cual se escribira
 	 */
-	Transferencia(std::string &pathOrigen, std::string &pathDestino);
+	Transferencia(std::string &pathOrigen, std::string &pathDestino, TRMODO modo);
 	
 	/* metodo para enviar datos a la memoria compartida.
 	 * retorno: 

@@ -14,19 +14,19 @@ char *BufferMem::getBuffer() {
 BufferMem::~BufferMem() {
 }
 
-void BufferMem::setTamArchivo(streampos tam) {
+void BufferMem::setTamArchivo(off_t tam) {
 	this->tamanoArchivo = tam;
 }
 
-streampos BufferMem::getTamArchivo() {
+off_t BufferMem::getTamArchivo() {
 	return this->tamanoArchivo;
 }
 
-void BufferMem::setTamEscrito(streampos tam) {
+void BufferMem::setTamEscrito(off_t tam) {
 	this->bytesEscritos = tam;
 }
 
-streampos BufferMem::getTamEscrito() {
+off_t BufferMem::getTamEscrito() {
 	return this->bytesEscritos;
 }
 

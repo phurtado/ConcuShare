@@ -17,6 +17,8 @@ class Cliente{
 				Semaforo* semEscritura;
 				bool estaConectado;
 		std::list<TPID> *listaHijos;
+		string crearNombreDestino(string &sharePath, string &destPath);
+		int crearHijoReceptor(string &pathOrigen, string &pathDestino, TPID pid);
         
     public:
         Cliente();
@@ -34,6 +36,7 @@ class Cliente{
  				 * Post: Retorna 0 en caso de éxito. 
  				 *       Retorna -1 si el pid del cliente no existe.
  				 *       Retorna -2 si sharePath no está siendo compartido por el
+ 				 * 		 Retorna -3 si destPath existe previamente
  				 *       cliente pid.
  				 */
 				int empezarTransferencia(string destPath, string sharePath, TPID pid);

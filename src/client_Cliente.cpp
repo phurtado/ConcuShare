@@ -4,6 +4,14 @@
 #include "logger.h"
 using namespace std;
 
+int existeArchivo(string &path) {
+	int res = open(path.c_str(), O_RDWR | O_CREAT | O_EXCL, 0755);
+	if(res == -1) // el archivo existe, no se crea
+		return 1;
+	return 0;
+}
+
+
 Cliente::Cliente(){
   this->fifoLectura = NULL;
   this->fifoEscritura = new Fifo(NOMBREFIFOSERVIDOR);
@@ -133,6 +141,15 @@ map<TPID,ListaPaths*>* Cliente::getCompartidos(){
 	
 		return mapa;
 }
+string Cliente::crearNombreDestino(string &sharePath, string &destPath) {
+	char *copiaNombre = new char[sharePath.size() + 1];
+	memcpy((void *) copiaNombre, (void *) sharePath.c_str(), sharePath.size());
+	copiaNombre[sharePath.size()] = 0;
+	string nombreBaseArchivo(basename(copiaNombre));
+	string nombreCompletoDest(destPath + "/" + nombreBaseArchivo);
+	delete [] copiaNombre;
+	return nombreCompletoDest;
+}
 
 int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 	// Le pido al servidor la lista de archivos compartidos y valido
@@ -159,12 +176,7 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
 		return -2;
 	}
 	
-	char *copiaNombre = new char[sharePath.size() + 1];
-	memcpy((void *) copiaNombre, (void *) sharePath.c_str(), sharePath.size());
-	copiaNombre[sharePath.size()] = 0;
-	string nombreBaseArchivo(basename(copiaNombre));
-	string nombreCompletoDest(destPath + "/" + nombreBaseArchivo);
-	delete [] copiaNombre;
+	string nombreCompletoDest = crearNombreDestino(sharePath, destPath);
 	
 	TPID pidProceso = getpid();
 	ParserComandos parser;
@@ -174,32 +186,43 @@ int Cliente::empezarTransferencia(string destPath, string sharePath, TPID pid) {
     this->semEscritura->v();
 	this->fifoEscritura->escribir(comando, parser.obtenerTamanioSolicitarTransf(sharePath, nombreCompletoDest));
 	char buffer[100];
-	int bytesLeidos = this->fifoLectura->leer(buffer, 100);
-	buffer[bytesLeidos] = 0;
+	recibirMensajeDelServidor(buffer, 100);
 	if(strcmp(buffer, TROK) != 0)
 		cout << "Error en la transferencia del archivo " << sharePath << endl;
 	else {
-		TPID pidHijo = fork();	
-		if(pidHijo == 0) { // es el hijo
-			if(Logger::isOpen()){ //si se abrió el cliente en modo debug, las transferencias asociadas también se ejecutarán en modo debug 
-                execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), "--debug", 0);
+		if(existeArchivo(nombreCompletoDest)) {
+			cout << "Error: el archivo destino " << destPath << " ya existe. No se realiza la transferencia." << endl;
+			return -3;
+		}
+		crearHijoReceptor(sharePath, nombreCompletoDest, pid);
+	}
+	
+    return 0;
+}
+
+int Cliente::crearHijoReceptor(string &pathOrigen, string &pathDestino, TPID pid) {
+	TPID pidHijo = fork();	
+	if(pidHijo == 0) { // es el hijo
+		if(Logger::isOpen()){ //si se abrió el cliente en modo debug, las transferencias asociadas también se ejecutarán en modo debug 
+                execl("./transf", "transf", "R", pathOrigen.c_str(), pathDestino.c_str(), "--debug", 0);
             }
             else{
-                execl("./transf", "transf", "R", sharePath.c_str(), nombreCompletoDest.c_str(), 0);
+                execl("./transf", "transf", "R", pathOrigen.c_str(), pathDestino.c_str(), 0);
             } 
 		}
 		else if(pidHijo > 0) {
 			this->listaHijos->push_back(pidHijo);
 			cout << "Procesando transferencia." << endl;
             stringstream ss;
-            ss<<"Ejecutando proceso (PID "<<pidHijo<<") de recepción desde el proceso con PID "<<pid<<" hasta "<<pidProceso<<" del archivo "<<sharePath<<" al archivo "<<nombreCompletoDest<<"."<<endl;
+            ss<<"Ejecutando proceso (PID "<<pidHijo<<") de recepción desde el proceso con PID "<<
+            pid<<" hasta "<<getpid()<<" del archivo "<<pathOrigen<<" al archivo "<<pathDestino<<"."<<endl;
             Logger::log(ss.str());
         } else
-			cout << "Error en la transferencia del archivo " << sharePath << endl;
-	}
-	
-    return 0;
+			cout << "Error en la transferencia del archivo " << pathOrigen << endl;
+	return 0;
 }
+
+
 
 bool Cliente::conectado() {
 	return this->estaConectado;
@@ -226,7 +249,6 @@ int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
     this->semEscritura->v();
     this->fifoEscritura->escribir(msj, sizeof(TCOM) + sizeof(TPID) + longMensaje);
     // Libero la memoria de la fifo
-	cout << "Terminando escritura" << endl;
     stringstream ss;
     ss<<pid<<tipo<<mensaje;
     Logger::log("Enviado el mensaje: "+ss.str());
