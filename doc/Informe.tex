@@ -1,0 +1,96 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[spanish]{babel} % Paquetes de idioma
+\usepackage[latin1]{inputenc} % Paquetes de idioma
+\usepackage{graphicx} % Paquete para ingresar gráficos
+\usepackage{grffile}
+\usepackage{hyperref}
+\usepackage{fancybox}
+\usepackage{amsmath}
+\usepackage{listings}
+
+% Encabezado y Pié de página
+\input{EncabezadoyPie.tex}
+% Carátula del Trabajo
+\title{ \input{Portada.tex} }
+
+\begin{document}
+	\maketitle % Hace que el título anterior sea el principal del documento
+	\newpage
+
+	\tableofcontents % Esta línea genera un indice a partir de las secciones y subsecciones creadas en el documento
+	\newpage
+
+	\section{Introducci\'on}
+		El presente trabajo consiste en el desarrollo de una aplicaci\'on {\it concurrente} conocida como \emph{ConcuShare}. El objetivo de la misma
+		es permitir el intercambio de archivos entre distintos usuarios. \\
+		\indent Debido a que la materia apunta a obtener conocimientos sobre los mecanismos de concurrencia vistos hasta el momento en la c\'atedra, 
+    el proyecto debe correr en una \'unica computadora y funcionar bajo un ambiente \emph{Unix/Linux} dado que los mecanismos vistos son los 
+    implementados por \emph{System V}. \\
+		\indent La implementaci\'on de la aplicaci\'on consiste en un esquema \emph{Cliente-Servidor}. El servidor se encuentra escuchando peticiones
+		del cliente. Los clientes deben conectarse al servidor, y luego de esto pueden utilizar los servicios provistos por el mismo.
+		\vspace{0.5cm}
+
+	\section{Modo de Operaci\'on}
+
+		\subsection {C\'omo compilar y correr la aplicaci\'on}
+			Para poder correr la aplicaci\'on correctamente, lo primero que debe realizarse es compilar el programa. Para esto se ha provisto de un
+			\emph{Makefile} que se encagar\'a de realizar el proceso de compilaci\'on. \\
+			\indent Para compilar la aplicaci\'on servidor se debe ingresar el siguiente comando:
+			\begin{verbatim}
+				make server
+			\end{verbatim}
+			\indent Para compilar la aplicaci\'on cliente se debe ingresar el siguiente comando:
+			\begin{verbatim}
+				make client
+			\end{verbatim}
+			\indent Para compilar la aplicaci\'on que se encarga de realizar las transferencias, se debe ingresar el siguiente comando:
+			\begin{verbatim}
+				make transf
+			\end{verbatim}
+			\indent En el caso de que desee compilar todas las aplicaciones juntas puede hacerlo por medio de alguno de los siguientes comandos:
+			\begin{verbatim}
+				make server client transf
+				make all
+			\end{verbatim}
+
+		\subsection{Casos de Uso}
+
+			Como bien se dijo, la aplicaci\'on est\'a compuesta por un \emph{Servidor} que escucha peticiones y \emph{Clientes} que realizan las mismas. 
+			De esta forma, el \emph{Servidor} es un proceso que no tiene interacci\'on con el usuario. En cambio, el \emph{Cliente} si tiene interacci\'on
+			con el usuario. La aplicaci\'on \emph{Cliente} despliega un men\'u con las tareas que puede realizar el mismo. A continuaci\'on se 
+			explica el modo de uso de cada una de las opciones del men\'u: 
+
+			\begin{itemize}
+				\item \textbf{1-Conectarse al Servidor:} Lo primero que debe hacer el cliente al iniciar la aplicaci\'on es conectarse a la misma. En el caso
+				de no conectarse no podr\'a realizar ninguna otra tarea.
+				\item \textbf{2-Desconectarse del Servidor:} Si el cliente desea dejar la aplicaci\'on debe desconectarse del servidor. Al desconectarse, el
+				servidor remueve de la lista de archivos compartidos todos los ficheros compartidos por este usuario.
+				\item \textbf{3-Compartir Archivos:} Mediante esta opci\'on, el cliente le indica al servidor que archivos quiere disponer para ser compartidos.
+				El mismo debe pasarle la ruta del archivo a compartir. La misma debe ser v\'alida.
+				\item \textbf{4-Descompartir Archivos:} Mediante esta opci\'on, el cliente le indica al servidor que archivos desea dejar de compatir con los 
+				dem\'as usuarios. El mismo debe pasarle la ruta del archivo a descompartir, la cual debe ser v\'alida.
+				\item \textbf{5-Descargar Archivos:} Mediante esta opci\'on, el usuario puede elegir que partidos compartidos desea descargarse. Debe ingresar
+				para esto el pid del cliente que se encuentra compartiendo el archivo, el path del archivo compartido y el path de destino.
+				\item \textbf{6-Obtener Lista de Archivos Compartidos:} Mediante esta opci\'on, el cliente obtiene la lista de los archivos compartidos por 
+				todos los clientes que se encuentran conectados. La lista muestra los archivos compartidos por cada cliente, de modo que teniendo esta 
+				informaci\'on se puede realizar la \emph{Descarga} de alg\'un archivo.
+				\item \textbf{7-Salir de la Aplicaci\'on:} Mediante esta opci\'on, el cliente abandona la aplicaci\'on. \emph{Se deber\'ia desconectar el cliente
+				antes de poder salir???}
+			\end{itemize}
+
+	\section{An\'alisis de la Soluci\'on}
+		\subsection{Divisi\'on de la Aplicaci\'on en Procesos}
+			Debido a la naturaleza de la soluci\'on adoptada, se pueden distinguir f\'acilmente los siguientes procesos:
+
+			\begin{itemize}
+				\item \textbf{Servidor:} Este proceso se encarga de escuchar las peticiones los clientes. Mientras ning\'un usuario le env\'ie ning\'un 
+				mensaje, el mismo se bloquea. Cuando un cliente le env\'ia alg\'un mensaje, despierta al mismo y \'este se encarga de responderle al 
+				usuario.
+				\item \textbf{Cliente:} Al abrir un usuario una aplicaci\'on Cliente, se crea un nuevo proceso el cual puede comunicarse con el servidor.
+				El Cliente env\'ia peticiones al servidor esperando una respuesta del mismo.
+				\item \textbf{Transferidor:} Este proceso se crea cada vez que un cliente desea descargarse un archivo compartido. Tanto el Servidor como
+				el Cliente crean un proceso \emph{Transferidor} por el cual se comunican para realizar la transferencia.
+			\end{itemize}
+
+		\subsection{Comunicaci\'on entre Procesos}
+\end{document}
