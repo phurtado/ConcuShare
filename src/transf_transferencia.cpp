@@ -101,11 +101,8 @@ int Transferencia::enviar() {
 		cualeselerror(errno);
 		exit(2);
 	}
-	
     Logger::instancia()<<"Escritura: Bytes leidos de archivo: " << posActual << el;
     
-    
-	
 	bool llegueAlFin = this->bytesTransferidos >= this->longitudArchivo;
 	if(llegueAlFin) {
 		Logger::instancia() << "Liberando archivo " << pathOrigen << el;
@@ -119,11 +116,8 @@ int Transferencia::recibir() {
 	stringstream ss;
 	if(! archivo->archivoLockeado()) {
 		archivo->tomarLock();
-		Logger::instancia() << "Lockeando el archivo " << pathDestino << " para escritura" << el;
-		
+		Logger::instancia() << "Lockeando el archivo " << pathDestino << " para escritura" << el;	
 	}
-	
-    
     Logger::instancia() << "Lectura: Bloqueo lectura " << el;
 	
 	// bloqueo la lectura
@@ -142,21 +136,15 @@ int Transferencia::recibir() {
 		cualeselerror(errno);
 		exit(4);
 	}
-	
 	archivo->escribir(b.getBuffer(), b.getTamEscrito());
     Logger::instancia() << "Lectura: Tamaño del Archivo: " << 
     b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos << el;
     
-    
-    
     bool archivoCompleto = this->bytesTransferidos >= b.getTamArchivo();
-    if(archivoCompleto) {
-		
+    if(archivoCompleto) {	
 		Logger::instancia() << "Liberando el archivo " << pathDestino << el;
-		
 		archivo->liberarLock();
 	}
-    
 	return (archivoCompleto) ? 1 : 0;
 }
 

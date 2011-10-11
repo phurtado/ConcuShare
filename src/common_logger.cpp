@@ -71,7 +71,7 @@ ofstream* Logger::logFile = NULL;
 std::string Logger::logPath;
 
 Logger& Logger::operator << (const string &cad) {
-	Logger::log(cad);
+	Logger::cadena += cad;
 	return *this;
 }
 

@@ -41,8 +41,6 @@ int main(int argc,char** argv) {
         }
     }
     Logger::instancia() << "Iniciando Servidor." << el;
-
-
 	s = new Servidor();
 	registrarSignalInt();
 	s->escucharComandos();
