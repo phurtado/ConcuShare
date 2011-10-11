@@ -198,8 +198,10 @@ int Servidor::transferirArchivo(string &pathArchivo, string &pathDestino,
 		(*this->fifosEscritura)[pidClienteDestino]->escribir((char*) TROK, strlen(TROK));
 	    this->listaHijos->push_back(pid);
 	    stringstream ss;
-        ss<<"Ejecutando proceso de transferencia con PID "<<pid<<" desde "<<pidClienteDuenioArchivo<<" hasta "<<pidClienteDestino<<" del archivo "<<pathArchivo<<" al archivo "<<pathDestino<<"."<<endl;
-        Logger::log(ss.str());
+        Logger::instancia()<<"Ejecutando proceso de transferencia con PID "<<
+        pid<<" desde "<<pidClienteDuenioArchivo<<" hasta "<<pidClienteDestino<<
+        " del archivo "<<pathArchivo<<" al archivo "<<pathDestino<<"."<<el;
+        
     }
 	return 0;
 }
@@ -218,13 +220,9 @@ Servidor::~Servidor() {
 	// espero por hijos que no terminaron todavia
 	list<TPID>::iterator itP = this->listaHijos->begin();
 	for(; itP != this->listaHijos->end(); itP++) {
-		stringstream ss;
-		ss << "Esperando por " << *itP << endl;
-		Logger::log(ss.str());
+		Logger::instancia() << "Esperando por " << *itP << el;
 		waitpid(*itP, NULL, 0);
-		ss.str("");
-		ss << "Listo" << endl;
-		Logger::log(ss.str());
+		Logger::instancia() << "Listo" << el;
 	}
 	
 	delete this->fifoLectura;

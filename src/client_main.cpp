@@ -123,7 +123,7 @@ int main(int argc,char** argv) {
             initLog(ss.str());
         }
     }
-    Logger::log("Iniciando Cliente.");
+    Logger::instancia() << "Iniciando Cliente." << el;
 
     while(continua) {
 		buscarHijosQueTerminaron(cliente->getListaHijos());
@@ -155,7 +155,7 @@ int main(int argc,char** argv) {
 			}	
 			if(solicitarPath(path, "compartir")) {
 				cout << "El path del archivo a compartir no existe" << endl;
-                Logger::log("Error al compartir "+path+", el archivo no existe.");
+                Logger::instancia() << "Error al compartir " << path << ", el archivo no existe." << el;
                 break;
 			}
 			cliente->compartirArchivo(path);
@@ -169,7 +169,7 @@ int main(int argc,char** argv) {
 			}
 			if(solicitarPath(path, "dejar de compartir")) {
 				cout << "El path del archivo a descompartir no existe" << endl;
-                Logger::log("Error al dejar de compartir "+path+", el archivo no existe.");
+                Logger::instancia() << "Error al dejar de compartir " << path << ", el archivo no existe." << el;
 				break;
 			}
 			cliente->dejarDeCompartirArchivo(path);
@@ -203,6 +203,8 @@ int main(int argc,char** argv) {
 			break;
 			}
 	}
+	
+	Logger::liberar();
 	
 	if(cliente)
 		delete cliente;

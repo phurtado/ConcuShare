@@ -40,12 +40,15 @@ int main(int argc,char** argv) {
             initLog(ss.str());
         }
     }
-    Logger::log("Iniciando Servidor.");
+    Logger::instancia() << "Iniciando Servidor." << el;
 
 
 	s = new Servidor();
 	registrarSignalInt();
 	s->escucharComandos();
+	
+	Logger::liberar();
+	
 	if(s)
 		delete s;
 	

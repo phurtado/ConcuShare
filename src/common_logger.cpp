@@ -1,14 +1,38 @@
 #include "logger.h"
-#include <ctime>
+
 using namespace std;
+
+
+Logger *Logger::inst = NULL;
+string Logger::cadena = "";
+
+Logger& el (Logger& l) {
+	l.log();
+	return l;
+}
+
+void Logger::log() {
+			Logger::log(Logger::cadena);
+			Logger::cadena.clear();
+}
+
+char *sacarNuevaLinea(char *cad) {
+	cad[strlen(cad) - 1] = 0;
+	return cad;
+}
 
 void Logger::log(std::string msj){
     if(isOpen()){
         time_t theTime;
         time(&theTime);
-        (*logFile) << "[" << ctime(&theTime) << "] | " << msj << endl;
+        (*logFile) << "[" << sacarNuevaLinea(ctime(&theTime)) << "] | " << msj << endl;
     }
-    cout << msj << endl;
+}
+
+Logger Logger::instancia() {
+	if(inst == NULL)
+		inst = new Logger();
+	return *inst;
 }
 
 void Logger::setLogFile(std::string path){
@@ -45,3 +69,44 @@ bool Logger::isOpen(){
 
 ofstream* Logger::logFile = NULL;
 std::string Logger::logPath;
+
+Logger& Logger::operator << (const string &cad) {
+	Logger::log(cad);
+	return *this;
+}
+
+Logger& Logger::operator << (const int num) {
+	stringstream ss;
+	ss << num;
+	Logger::cadena += ss.str();
+	return *this;
+}
+
+Logger& Logger::operator << (const char * cad) {
+	Logger::cadena += cad;
+	return *this;
+}
+
+Logger& Logger::operator << (const char car) {
+	
+	Logger::cadena += car;
+	return *this;
+}
+
+Logger& Logger::operator << (const off_t num) {
+	stringstream ss;
+	ss << num;
+	Logger::cadena += ss.str();
+	return *this;
+}
+
+Logger& Logger::operator<< (Logger& ( *pf )(Logger&)) {
+	return pf(*this);
+}
+
+void Logger::liberar() {
+	Logger::close();
+	if(Logger::inst)
+		delete Logger::inst;
+	Logger::inst = NULL;
+}

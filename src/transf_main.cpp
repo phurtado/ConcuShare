@@ -52,5 +52,7 @@ int main(int argc, char *argv[]) {
 		cout << "Transferencia del archivo " << pathDestino << " finalizada." << endl;
 	}
 	
+	Logger::liberar();
+	
 	return (res == 1) ? 0 : 1;
 }

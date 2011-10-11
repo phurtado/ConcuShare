@@ -32,13 +32,9 @@ Cliente::~Cliente() {
 	
 	list<TPID>::iterator it = this->listaHijos->begin();
 	for(; it != this->listaHijos->end(); it++) {
-		stringstream ss;
-		ss << "Esperando por " << *it << endl;
-		Logger::log(ss.str());
+		Logger::instancia() << "Esperando por " << *it << el;
 		waitpid(*it, NULL, 0);
-		ss.str("");
-		ss << "Listo" << endl;
-		Logger::log(ss.str());
+		Logger::instancia() << "Listo" << el;
 	}
 	
 	delete this->listaHijos;
@@ -57,21 +53,16 @@ void Cliente::conectarAlServidor(){
     this->recibirMensajeDelServidor(buffer,100);
     if(strcmp(buffer,ALTAOK) == 0) {
     	cout << "Conexión realizada con éxito" << endl;
-        Logger::log("Conexión realizada con éxito.");
+        Logger::instancia() << "Conexión realizada con éxito." << el;
 			this->estaConectado = true;
     }
-    stringstream ss2;
-    ss2<<buffer;
-    Logger::log("Recibido mensaje del servidor: "+ss2.str());
-    
+    Logger::instancia() << "Recibido mensaje del servidor: " << buffer << el;
 }
 
 void Cliente::recibirMensajeDelServidor(char* buffer,int bufsize){
     int bytesLeidos = this->fifoLectura->leer(buffer, bufsize);
 	buffer[bytesLeidos] = '\0';
-    stringstream ss;
-    ss<<buffer;
-    Logger::log("Recibido mensaje del servidor: "+ss.str());
+    Logger::instancia() << "Recibido mensaje del servidor: " << buffer << el;
 }
 
 
@@ -233,10 +224,9 @@ int Cliente::crearHijoReceptor(string &pathOrigen, string &pathDestino, TPID pid
 		}
 		else if(pidHijo > 0) {
 			this->listaHijos->push_back(pidHijo);
-            stringstream ss;
-            ss<<"Ejecutando proceso (PID "<<pidHijo<<") de recepción desde el proceso con PID "<<
-            pid<<" hasta "<<getpid()<<" del archivo "<<pathOrigen<<" al archivo "<<pathDestino<<"."<<endl;
-            Logger::log(ss.str());
+            Logger::instancia()<<"Ejecutando proceso (PID "<<pidHijo<<") de recepción desde el proceso con PID "<<
+            pid<<" hasta "<<getpid()<<" del archivo "<<pathOrigen<<" al archivo "<<pathDestino<<"."<<el;
+            
         } else
 			cout << "Error en la transferencia del archivo " << pathOrigen << endl;
 	return 0;
@@ -269,8 +259,7 @@ int Cliente::escribirMensajeAlServidor(TCOM tipo,string mensaje){
     this->semEscritura->v();
     this->fifoEscritura->escribir(msj, sizeof(TCOM) + sizeof(TPID) + longMensaje);
     // Libero la memoria de la fifo
-    stringstream ss;
-    ss<<pid<<tipo<<mensaje;
-    Logger::log("Enviado el mensaje: "+ss.str());
+    
+    Logger::instancia() << "Enviado el mensaje: " << pid << tipo << mensaje << el;
     return 0;
 }

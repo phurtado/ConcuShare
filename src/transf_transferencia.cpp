@@ -76,9 +76,7 @@ int Transferencia::enviar() {
 	int res;
 	char bufferLocal[BUFMEMSIZE];
 	if(! this->archivo->archivoLockeado()) {
-		ss.clear();
-		ss << "Lockeando el archivo " << pathOrigen << " para lectura" << endl;
-		Logger::log(ss.str());
+		Logger::instancia() << "Lockeando el archivo " << pathOrigen << " para lectura" << el;
 		this->archivo->tomarLock();
 	}
 	
@@ -104,16 +102,13 @@ int Transferencia::enviar() {
 		exit(2);
 	}
 	
-    ss<<"Escritura: Bytes leidos de archivo: " << posActual;
-    Logger::log(ss.str());
-    ss.str("");
+    Logger::instancia()<<"Escritura: Bytes leidos de archivo: " << posActual << el;
+    
+    
 	
 	bool llegueAlFin = this->bytesTransferidos >= this->longitudArchivo;
 	if(llegueAlFin) {
-		ss.clear();
-		ss.str("");
-		ss << "Liberando archivo " << pathOrigen << endl;
-		Logger::log(ss.str());
+		Logger::instancia() << "Liberando archivo " << pathOrigen << el;
 		archivo->liberarLock();
 	}
 	return (llegueAlFin) ? 1 : 0;
@@ -124,13 +119,12 @@ int Transferencia::recibir() {
 	stringstream ss;
 	if(! archivo->archivoLockeado()) {
 		archivo->tomarLock();
-		ss << "Lockeando el archivo " << pathDestino << " para escritura" << endl;
-		Logger::log(ss.str());
-		ss.clear();
-		ss.str("");
+		Logger::instancia() << "Lockeando el archivo " << pathDestino << " para escritura" << el;
+		
 	}
 	
-    Logger::log("Lectura: Bloqueo lectura ");
+    
+    Logger::instancia() << "Lectura: Bloqueo lectura " << el;
 	
 	// bloqueo la lectura
 	if((res = this->semaforos->p(SEMLEER)) != 0) {
@@ -150,19 +144,17 @@ int Transferencia::recibir() {
 	}
 	
 	archivo->escribir(b.getBuffer(), b.getTamEscrito());
-	
-    stringstream ss2;
-    ss2 << "Lectura: Tamaño del Archivo: " << b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos;
-    Logger::log(ss2.str());
+    Logger::instancia() << "Lectura: Tamaño del Archivo: " << 
+    b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos << el;
+    
     
     
     bool archivoCompleto = this->bytesTransferidos >= b.getTamArchivo();
     if(archivoCompleto) {
-		ss.clear();
-		ss << "Liberando el archivo " << pathDestino << endl;
-		Logger::log(ss.str());
+		
+		Logger::instancia() << "Liberando el archivo " << pathDestino << el;
+		
 		archivo->liberarLock();
-		ss.str("");
 	}
     
 	return (archivoCompleto) ? 1 : 0;
@@ -173,6 +165,7 @@ Transferencia::~Transferencia() {
 	this->memoriaCompartida->liberar();
 	delete this->memoriaCompartida;
 	
+	this->semaforos->p(SEMESCR);
 	this->semaforos->eliminar();
 	delete this->semaforos;
 	
