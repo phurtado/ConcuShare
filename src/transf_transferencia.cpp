@@ -12,7 +12,6 @@ Transferencia::Transferencia(string &pathOrigen, string &pathDestino, TRMODO mod
 		case ENVIAR:
 			this->archivo = new LockFile(pathOrigen.c_str(), LECTURA);
 			this->longitudArchivo = this->archivo->obtenerTamanioArchivo();
-			this->buffer.setTamArchivo(this->longitudArchivo);
 			this->bytesTransferidos = 0;
 			break;
 		case RECIBIR:
@@ -34,9 +33,48 @@ Transferencia::Transferencia(string &pathOrigen, string &pathDestino, TRMODO mod
 	this->semaforos = new Semaforo(pathDestino.c_str(), 2, valoresIniciales);
 }
 	
+void cualeselerror(int e) {
+	cout << "Error en una operacion de semaforo: ";
+	switch(e) {
+		case E2BIG:
+			cout << "E2BIG"  << endl;
+			break;
+		case EACCES:
+			cout << "EACCES" << endl;
+			break;
+		case EAGAIN:
+			cout << "EAGAIN" << endl;
+			break;
+		case EFAULT:
+			cout << "EFAULT" << endl;
+			break;
+		case EFBIG:
+			cout << "EFBIG" << endl;
+			break;
+		case EIDRM:
+			cout << "IEDRM" << endl;
+			break;
+		case EINTR:
+			cout << "EINTR" << endl;
+			break;
+		case EINVAL:
+			cout << "EINVAL" << endl;
+			break;
+		case ENOMEM:
+			cout << "ENOMEM" << endl;
+			break;
+		case ERANGE:
+			cout << "ERANGE" << endl;
+			break;
+	}
+	cout << "Verifique su manual de semaforos para saber de qué se trata." << endl;
+}
+
 
 int Transferencia::enviar() {
 	stringstream ss;
+	int res;
+	char bufferLocal[BUFMEMSIZE];
 	if(! this->archivo->archivoLockeado()) {
 		ss.clear();
 		ss << "Lockeando el archivo " << pathOrigen << " para lectura" << endl;
@@ -44,20 +82,30 @@ int Transferencia::enviar() {
 		this->archivo->tomarLock();
 	}
 	
-	off_t posActual = this->archivo->leer(this->buffer.getBuffer(), BUFMEMSIZE);
+	off_t posActual = this->archivo->leer(bufferLocal, BUFMEMSIZE);
+	this->buffer.setDatos(bufferLocal);
 	
+	this->buffer.setTamArchivo(this->longitudArchivo);
 	this->buffer.setTamEscrito(posActual);
 	this->bytesTransferidos += posActual;
 	
+	
 	// bloqueo la escritura hasta que se termine la lectura
-	this->semaforos->p(SEMESCR);
+	if((res = this->semaforos->p(SEMESCR)) != 0) {
+		cualeselerror(errno);
+		exit(1);
+	}
+	
 	this->memoriaCompartida->escribir(buffer);
+	
 	// desbloqueo la lectura
-	this->semaforos->v(SEMLEER);
+	if((res = this->semaforos->v(SEMLEER)) != 0) {
+		cualeselerror(errno);
+		exit(2);
+	}
 	
     ss<<"Escritura: Bytes leidos de archivo: " << posActual;
     Logger::log(ss.str());
-    
     ss.str("");
 	
 	bool llegueAlFin = this->bytesTransferidos >= this->longitudArchivo;
@@ -72,30 +120,42 @@ int Transferencia::enviar() {
 }
 
 int Transferencia::recibir() {
-	
+	int res;
 	stringstream ss;
 	if(! archivo->archivoLockeado()) {
 		archivo->tomarLock();
 		ss << "Lockeando el archivo " << pathDestino << " para escritura" << endl;
 		Logger::log(ss.str());
 		ss.clear();
+		ss.str("");
 	}
 	
-    //Logger::log("Lectura: Bloqueo lectura ");
+    Logger::log("Lectura: Bloqueo lectura ");
+	
 	// bloqueo la lectura
-	this->semaforos->p(SEMLEER);
+	if((res = this->semaforos->p(SEMLEER)) != 0) {
+		cualeselerror(errno);
+		exit(3);
+	}
+	
 	BufferMem b = this->memoriaCompartida->leer();
-    
+	
 	off_t pos = b.getTamEscrito();
 	this->bytesTransferidos += pos;
+	
 	// desbloqueo la escritura
-	this->semaforos->v(SEMESCR);
-    //Logger::log("Lectura: terminada.");
+	if((res = this->semaforos->v(SEMESCR)) != 0) {
+		cualeselerror(errno);
+		exit(4);
+	}
+	
 	archivo->escribir(b.getBuffer(), b.getTamEscrito());
 	
     stringstream ss2;
     ss2 << "Lectura: Tamaño del Archivo: " << b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos;
     Logger::log(ss2.str());
+    
+    
     bool archivoCompleto = this->bytesTransferidos >= b.getTamArchivo();
     if(archivoCompleto) {
 		ss.clear();
@@ -103,12 +163,9 @@ int Transferencia::recibir() {
 		Logger::log(ss.str());
 		archivo->liberarLock();
 		ss.str("");
-    
-		ss<<"Tamaño del archivo: " << this->longitudArchivo;
-    Logger::log(ss.str());
 	}
     
-	return ((archivoCompleto) || (b.esFin())) ? 1 : 0;
+	return (archivoCompleto) ? 1 : 0;
 }
 
 

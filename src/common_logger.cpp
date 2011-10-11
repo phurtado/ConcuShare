@@ -8,6 +8,7 @@ void Logger::log(std::string msj){
         time(&theTime);
         (*logFile) << "[" << ctime(&theTime) << "] | " << msj << endl;
     }
+    cout << msj << endl;
 }
 
 void Logger::setLogFile(std::string path){

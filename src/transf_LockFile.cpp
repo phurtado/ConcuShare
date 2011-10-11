@@ -6,7 +6,7 @@ LockFile :: LockFile ( const char* nombre, TMODO modo ) {
 	
 	switch(modo) {
 		case LECTURA:
-			this->fd = open ( this->nombre,O_RDWR );
+			this->fd = open ( this->nombre,O_RDONLY ); 
 			this->tipoLock = F_RDLCK;
 			break;
 		case ESCRITURA:

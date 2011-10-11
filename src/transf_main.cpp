@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
 		Transferencia transf(pathOrigen, pathDestino, RECIBIR);
 		while((res = transf.recibir()) == 0)
 			;
+		cout << "Transferencia del archivo " << pathDestino << " finalizada." << endl;
 	}
 	
 	return (res == 1) ? 0 : 1;

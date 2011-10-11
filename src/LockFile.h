@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef enum {LECTURA, ESCRITURA} TMODO;
 
@@ -17,12 +18,12 @@ private:
 	short tipoLock;
 	char nombre [ 255 ];
 	bool lockActivo;
-
+	
 public:
 
 	LockFile ( const char* nombre, TMODO modo );
 	virtual ~LockFile();
-
+	
 	int tomarLock ();
 	int liberarLock ();
 	int escribir ( char* buffer,int buffsize );

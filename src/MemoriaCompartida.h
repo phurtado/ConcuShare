@@ -27,7 +27,7 @@ public:
 	~MemoriaCompartida ();
 	int crear ( const char *archivo,char letra );
 	void liberar ();
-	void escribir ( T dato );
+	void escribir ( T &dato );
 	T leer ();
 
 };
@@ -76,13 +76,14 @@ template <class T> void MemoriaCompartida<T> :: liberar () {
 	}
 }
 
-template <class T> void MemoriaCompartida<T> :: escribir ( T dato ) {
+template <class T> void MemoriaCompartida<T> :: escribir ( T &dato ) {
 	* (this->ptrDatos) = dato;
 }
 
 template <class T> T MemoriaCompartida<T> :: leer () {
 	return ( *(this->ptrDatos) );
 }
+
 
 template <class T> int MemoriaCompartida<T> :: cantidadProcesosAdosados () {
 	shmid_ds estado;

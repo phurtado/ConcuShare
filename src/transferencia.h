@@ -1,12 +1,13 @@
 #ifndef TRANSF_H_
 #define TRANSF_H_
 
+
+#include <string>
 #include "MemoriaCompartida.h"
 #include "buffermem.h"
 #include "Semaforo.h"
 #include "LockFile.h"
-#include <string>
-#include <fstream>
+#include "buffermem.h"
 
 /* Letra a usar en la memoria compartida */
 #define LETRA 'c'

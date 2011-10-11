@@ -2,8 +2,10 @@
 #define BUFFMEM_H_
 
 #include <stdlib.h>
+#include <string.h>
 
 /* tamano del buffer */
+
 #define BUFMEMSIZE 20
 
 class BufferMem {
@@ -32,6 +34,10 @@ class BufferMem {
 		bool esFin();
 
 		void setFin(bool fin);
+		
+		void setDatos(const char dato[BUFMEMSIZE]) {
+			memcpy(this->buffer, dato, BUFMEMSIZE);
+		}
 		
 		/* destructor del buffer */
 		virtual ~BufferMem();

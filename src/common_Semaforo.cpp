@@ -41,11 +41,17 @@ int Semaforo::inicializar (int posSem, int valor) {
 	return resultado;
 }
 
+int Semaforo::getValor(int numSem) {
+	int resultado = semctl(this->id, numSem, GETVAL);
+	
+	return resultado;
+}
+
 int Semaforo::p (int numSem) {
 	struct sembuf operacion;
 	operacion.sem_num = numSem;	// numero de semaforo
 	operacion.sem_op  = -1;	// restar 1 al semaforo
-	operacion.sem_flg = SEM_UNDO;
+	operacion.sem_flg = 0;
 	int resultado = semop ( this->id,&operacion,1 );
 	return resultado;
 }
@@ -54,7 +60,7 @@ int Semaforo::v (int numSem) {
 	struct sembuf operacion;
 	operacion.sem_num = numSem;	// numero de semaforo
 	operacion.sem_op  = 1;	// sumar 1 al semaforo
-	operacion.sem_flg = SEM_UNDO;
+	operacion.sem_flg = 0;
 	int resultado = semop ( this->id,&operacion,1 );
 	return resultado;
 }

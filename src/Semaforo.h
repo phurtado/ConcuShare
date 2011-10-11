@@ -25,6 +25,7 @@ public:
 	virtual ~Semaforo();
 	int p (int numSem = 0); // decrementa
 	int v (int numSem = 0); // incrementa
+	int getValor(int numSem = 0);
 	void eliminar ();
 };
 
