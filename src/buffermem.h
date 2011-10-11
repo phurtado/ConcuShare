@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /* tamano del buffer */
-#define BUFMEMSIZE 1000
+#define BUFMEMSIZE 20
 
 class BufferMem {
 	private:
