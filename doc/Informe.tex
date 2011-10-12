@@ -66,21 +66,96 @@
 			explica el modo de uso de cada una de las opciones del men\'u: 
 
 			\begin{itemize}
-				\item \textbf{1-Conectarse al Servidor:} Lo primero que debe hacer el cliente al iniciar la aplicaci\'on es conectarse a la misma. En el caso
+				
+                \item \textbf{1-Conectarse al Servidor:} Lo primero que debe hacer el cliente al iniciar la aplicaci\'on es conectarse a la misma. En el caso
 				de no conectarse no podr\'a realizar ninguna otra tarea.
-				\item \textbf{2-Desconectarse del Servidor:} Si el cliente desea dejar la aplicaci\'on debe desconectarse del servidor. Al desconectarse, el
+                
+                Precondici\'on: El servidor se encuentra corriendo. El cliente se encuentra conectado.
+                \begin{itemize}
+                    \item El cliente solicita conectarse al servidor a trav\'es del canal de lectura del servidor.
+                    \item El servidor recibe la solicitud y abre un canal de escritura para comunicarse con el cliente.
+                \end{itemize}
+                
+                \item \textbf{2-Desconectarse del Servidor:} Si el cliente desea dejar la aplicaci\'on debe desconectarse del servidor. Al desconectarse, el
 				servidor remueve de la lista de archivos compartidos todos los ficheros compartidos por este usuario.
-				\item \textbf{3-Compartir Archivos:} Mediante esta opci\'on, el cliente le indica al servidor que archivos quiere disponer para ser compartidos.
+                
+                Precondici\'on: El servidor se encuentra corriendo. El cliente se encuentra conectado.
+				\begin{itemize}
+                    \item El cliente solicita al servidor desconectarse del mismo.
+                    \item El servidor recibe el mensaje, cierra el canal de escritura por el cual se comunica con ese cliente y deja de compartir los archivos que compart\'ia el usuario dado de baja.
+                \end{itemize}
+                
+                \item \textbf{3-Compartir Archivos:} Mediante esta opci\'on, el cliente le indica al servidor que archivos quiere disponer para ser compartidos.
 				El mismo debe pasarle la ruta del archivo a compartir. La misma debe ser v\'alida.
-				\item \textbf{4-Descompartir Archivos:} Mediante esta opci\'on, el cliente le indica al servidor que archivos desea dejar de compatir con los 
+
+                Precondici\'on: El servidor se encuentra corriendo. El cliente se encuentra conectado.
+                \begin{itemize}
+                    \item El usuario solicita compartir un archivo.
+                    \item El programa cliente pregunta la ruta del archivo a compartir.
+                    \item El usuario ingresa la ruta del archivo a compartir.
+                    \item El programa cliente valida la ruta (E1) y la env\'ia al servidor.
+                    \item El servidor agrega el archivo a la lista de archivos compartidos por el cliente correspondiente.
+                \end{itemize}
+                
+                E1) La ruta no corresponde a un archivo existente.
+                    \begin{itemize}
+                        \item El programa cliente muestra un mensaje de error y vuelve al men\'u de selecci\'on de operaci\'on.
+				    \end{itemize}
+                
+                \item \textbf{4-Descompartir Archivos:} Mediante esta opci\'on, el cliente le indica al servidor que archivos desea dejar de compatir con los 
 				dem\'as usuarios. El mismo debe pasarle la ruta del archivo a descompartir, la cual debe ser v\'alida.
-				\item \textbf{5-Descargar Archivos:} Mediante esta opci\'on, el usuario puede elegir que partidos compartidos desea descargarse. Debe ingresar
+				
+                
+                Precondici\'on: El servidor se encuentra corriendo. El cliente se encuentra conectado. El cliente que solicita la baja del archivo compartido es el mismo que lo comparte.
+                \begin{itemize}
+                    \item El usuario solicita dejar de compartir un archivo.
+                    \item El programa cliente pregunta la ruta del archivo a dejar de compartir.
+                    \item El usuario ingresa la ruta.
+                    \item El programa cliente verifica la existencia del archivo indicado (E1) y env\'ia un mensaje al servidor solicitando la eliminaci\'on del archivo de la lista de compartidos.
+                    \item El servidor recibe el mensaje, elimina el archivo de la lista (E2) y responde con un mensaje de OK.
+                    \item El cliente recibe el mensaje y notifica al usuario del \'exito de la operaci\'on.
+                \end{itemize}
+
+                E1) La ruta no corresponde a un archivo existente.
+                \begin{itemize}
+                    \item El programa cliente muestra un mensaje de error y vuelve al men\'u de selecci\'on de operaci\'on.
+                \end{itemize}
+                
+                E2) Ocurri\'o un error en el servidor.
+                \begin{itemize}
+                    \item El servidor env\'ia un mensaje de error al cliente.
+                    \item El cliente muestra un mensaje de error al usuario.
+                \end{itemize}
+
+                \item \textbf{5-Descargar Archivos:} Mediante esta opci\'on, el usuario puede elegir que partidos compartidos desea descargarse. Debe ingresar
 				para esto el pid del cliente que se encuentra compartiendo el archivo, el path del archivo compartido y el path de destino.
-				\item \textbf{6-Obtener Lista de Archivos Compartidos:} Mediante esta opci\'on, el cliente obtiene la lista de los archivos compartidos por 
+				
+                \begin{itemize}
+                    \item \textit{Pendiente!}
+                \end{itemize}
+                
+                \item \textbf{6-Obtener Lista de Archivos Compartidos:} Mediante esta opci\'on, el cliente obtiene la lista de los archivos compartidos por 
 				todos los clientes que se encuentran conectados. La lista muestra los archivos compartidos por cada cliente, de modo que teniendo esta 
 				informaci\'on se puede realizar la \emph{Descarga} de alg\'un archivo.
-				\item \textbf{7-Salir de la Aplicaci\'on:} Mediante esta opci\'on, el cliente abandona la aplicaci\'on. \emph{Se deber\'ia desconectar el cliente
-				antes de poder salir???}
+                   
+                Precondici\'on: El servidor se encuentra corriendo. El cliente se encuentra conectado.
+				
+                \begin{itemize}
+                   \item El usuario solicita al programa cliente que le muestre la lista de archivos compartidos.
+                   \item El programa cliente solicita al servidor la lista de archivos compartidos.
+                   \item El servidor env\'ia la lista.
+                   \item El cliente recibe la lista y la muestra al usuario.
+                \end{itemize}
+                
+                \item \textbf{7-Salir de la Aplicaci\'on:} Mediante esta opci\'on, el cliente abandona la aplicaci\'on.
+
+                Precondici\'on: El servidor se encuentra corriendo. El cliente se encuentra conectado.
+                
+                \begin{itemize}
+                    \item El usuario solicita salir del programa cliente.
+                    \item Si el usuario se encuentra conectado, se desconecta.
+                    \item Finaliza el programa cliente.
+                \end{itemize}
 			\end{itemize}
 
 	\section{An\'alisis de la Soluci\'on}
