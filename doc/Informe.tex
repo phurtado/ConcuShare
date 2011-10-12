@@ -314,27 +314,33 @@
 			se encuentre leyendo la memoria a la hora de que otro quiera escribirla. En este caso, el proceso que escribe se suspende 
 			hasta que el proceso que lee incremente el sem\'aforo, lo cual se da cuando termina de leer.
 			
-
-			\subsubsection{Escritura sobre el Logger} 
-				Al ejecutarse la aplicaci\'on en \emph{Modo Debug}, muchos procesos podr\'ian escribir el archivo al mismo tiempo. Esto
-			puede provocar que los mensajes se mezclen entre s\'i y el archivo de log quede ilegible.
-			Para solucionar este inconveniente, se agrega un lock de escritura sobre el archivo de log cada vez que un proceso logea
-			alg\'un mensaje. El mismo se retira al terminarse la escritura sobre el mismo, dejando que cualquier otro proceso pueda 
-			escribir otro mensaje.
+		% Esto no iria porque no usamos Locks sobre el archivo de Log
+		%	\subsubsection{Escritura sobre el Logger} 
+		% 		Al ejecutarse la aplicaci\'on en \emph{Modo Debug}, muchos procesos podr\'ian escribir el archivo al mismo tiempo. Esto
+		%	puede provocar que los mensajes se mezclen entre s\'i y el archivo de log quede ilegible.
+		%	Para solucionar este inconveniente, se agrega un lock de escritura sobre el archivo de log cada vez que un proceso logea
+		%	alg\'un mensaje. El mismo se retira al terminarse la escritura sobre el mismo, dejando que cualquier otro proceso pueda 
+		%	escribir otro mensaje.
 
 	\section{Diagramas}
 		
 		\subsection{Diagramas de Estado}
 			\begin{figure}[!htpb]
 				\centering
-				\includegraphics[width=12cm]{DEstadoVidaCliente.jpeg}
+				\includegraphics[width=11cm]{DEstadoVidaCliente.jpeg}
 				\caption{Diagrama de Estado del Proceso Cliente} \label{Img001}
 			\end{figure}
 
 			\begin{figure}[!htpb]
 				\centering
-				\includegraphics[width=12cm]{DEstadoVidaServidor.jpeg}
+				\includegraphics[width=11cm]{DEstadoVidaServidor.jpeg}
 				\caption{Diagrama de Estado del Proceso Servidor} \label{Img002}
+			\end{figure}
+
+			\begin{figure}[!htpb]
+				\centering
+				\includegraphics[width=11cm]{DEstadoVidaTransferidor.jpeg}
+				\caption{Diagrama de Estado del Proceso Transferidor}
 			\end{figure}
 
 		\newpage
@@ -342,7 +348,7 @@
 			\begin{figure}[!htpb]
 				\centering
 				\includegraphics[width=12cm]{dclases.png}
-				\caption{Diagrama de Clases de la Aplicaci\'on ConcuShare} \label{Img001}
+				\caption{Diagrama de Clases de la Aplicaci\'on ConcuShare}
 			\end{figure}
 		
 			
