@@ -88,7 +88,6 @@ Logger& Logger::operator << (const char * cad) {
 }
 
 Logger& Logger::operator << (const char car) {
-	
 	Logger::cadena += car;
 	return *this;
 }

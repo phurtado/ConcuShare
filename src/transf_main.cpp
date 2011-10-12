@@ -7,11 +7,6 @@
 #include <cstring>
 using namespace std;
 
-//void handler_SIGINT(int sig) {
-//	cerr<<"Esperando a que termine la transferencia."<<endl;
-//}
-
-
 void registrarSignalInt() {
 	struct sigaction sa;
 	sigemptyset(& sa.sa_mask);

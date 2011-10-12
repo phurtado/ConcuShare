@@ -33,7 +33,7 @@ void initLog(std::string logfile){
 
 int main(int argc,char** argv) {
 	cout << "Servidor escuchando peticiones de clientes..." << endl;
-
+	
     //Inicializacion Logger
     if(argc>1){
         if(strcmp(argv[1],"--debug")==0){
@@ -49,9 +49,11 @@ int main(int argc,char** argv) {
 	
 	Logger::liberar();
 	
-	if(s)
+	if(s) {
 		delete s;
-	
+		s = NULL;
+	}
     Logger::close();
+    
 	return 0;
 }

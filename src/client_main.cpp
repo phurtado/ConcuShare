@@ -31,9 +31,13 @@ void registrarSignalInt() {
 void mostrarListaCompartidos(map<TPID, ListaPaths*> *mapaCompartidos) {
 	map<TPID, ListaPaths*>::iterator itM = mapaCompartidos->begin();
 	ListaPaths::iterator itL;
+	TPID pidPropio = getpid();
 	cout << "Lista de compartidos con " << mapaCompartidos->size() << " clientes." << endl;
 	for(; itM != mapaCompartidos->end(); itM++) {
-		cout << "Cliente pid: " << itM->first << endl;
+		if(itM->first != pidPropio)
+			cout << "Cliente pid: " << itM->first << endl;
+		else
+			cout << "Cliente actual (" << pidPropio << ") " << endl;
 		for(itL = itM->second->begin(); itL != itM->second->end(); itL++)
 			cout << "\tArchivo de " << itM->first << ": " << *itL << endl;
 	}
