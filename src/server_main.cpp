@@ -10,9 +10,11 @@ using namespace std;
 Servidor *s = NULL;
 
 void handler_SIGINT(int sig) {
-	s->setContinua(false);
-	delete s;
-	s = NULL;
+	if(s!=NULL){
+        s->setContinua(false);
+        delete s;
+	    s = NULL;
+    }
 }
 
 
