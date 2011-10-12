@@ -7,6 +7,18 @@
 #include <cstring>
 using namespace std;
 
+//void handler_SIGINT(int sig) {
+//	cerr<<"Esperando a que termine la transferencia."<<endl;
+//}
+
+
+void registrarSignalInt() {
+	struct sigaction sa;
+	sigemptyset(& sa.sa_mask);
+	sa.sa_handler = SIG_IGN;//handler_SIGINT;	
+	sigaction(SIGINT, &sa, NULL);
+}
+
 void initLog(std::string logfile){
     Logger::setLogFile(logfile);
     Logger::open();
@@ -35,6 +47,8 @@ int main(int argc, char *argv[]) {
 		cerr << "Error. Numero de argumentos invalido." << endl;
 		return 0;
 	}
+
+    registrarSignalInt();
 	
 	string pathOrigen(argv[2]), pathDestino(argv[3]), modo(argv[1]);
 	
@@ -42,7 +56,7 @@ int main(int argc, char *argv[]) {
 	if(! modo.compare("E")) {
 		Transferencia transf(pathOrigen, pathDestino, ENVIAR);
 		while((res = transf.enviar()) == 0)
-			;
+		    ;
 	}
 	
 	if(! modo.compare("R")) {
