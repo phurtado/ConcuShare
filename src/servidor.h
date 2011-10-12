@@ -10,7 +10,6 @@
 #include "parsercomandos.h"
 #include "fifo.h"
 
-using namespace std;
 
 class Servidor {
 	private:

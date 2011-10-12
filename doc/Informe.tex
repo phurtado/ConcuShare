@@ -127,13 +127,38 @@
                     \item El cliente muestra un mensaje de error al usuario.
                 \end{itemize}
 
-                \item \textbf{5-Descargar Archivos:} Mediante esta opci\'on, el usuario puede elegir que partidos compartidos desea descargarse. Debe ingresar
+                \item \textbf{5-Descargar Archivos:} Mediante esta opci\'on, el usuario puede elegir qu\'e archivos compartidos desea descargarse. Debe ingresar
 				para esto el pid del cliente que se encuentra compartiendo el archivo, el path del archivo compartido y el path de destino.
 				
                 \begin{itemize}
-                    \item \textit{Pendiente!}
+			\item El usuario solicita transferir un archivo.
+			\item El cliente pregunta el PID del cliente del cual se desea transferir el archivo.
+			\item El usuario ingresa el PID.
+			\item El cliente pregunta el path donde quiere descargar el archivo (debe ser un directorio).
+			\item El usuario ingresa el path.
+			\item El cliente pregunta el path del archivo compartido. Este se debe ingresar de la misma forma que est\'a en la lista de archivos compartidos.
+			\item El usuario ingresa el path.
+			\item El cliente verifica los paths, cancelando la operaci\'on en caso de error (E1) y mostrando el mensaje correspondiente
+			\item Si todo est\'a bien, el cliente envia al servidor el comando para solicitar transferencia.
+			\item El servidor crea el proceso \emph{Transferidor} pas\'andole los paths de origen y destino. Este ser\'a quien transmita el archivo.
+			\item El servidor responde al cliente notific\'andole que todo est\'a listo para comenzar la transferencia.
+			\item El cliente crea el proceso \emph{Transferidor} pas\'andole los paths. Este ser\'a quien reciba el archivo.
+			\item Comienza la transferencia.
+			\item Si todo sali\'o bien, el \emph{Transferidor} receptor notifica al usuario que la transferencia se ejecut\'o exitosamente.
                 \end{itemize}
-                
+		E1) Errores posibles
+		\begin{enumerate}
+			\item El pid ingresado no es v\'alido (es 0).
+			\item El path de destino no es v\'alido (quiz\'as no es un directorio).
+			\item El path del archivo compartido no es v\'alido (puede no existir).
+			\item El cliente con el PID ingresado no se encuentra conectado.
+			\item El cliente ingresado no est\'a compartiendo el archivo especificado.
+		\end{enumerate}
+		\begin{itemize}
+			\item El cliente muestra el mensaje de error correspondiente.
+			\item El cliente vueve al men\'u principal.
+		\end{itemize}
+
                 \item \textbf{6-Obtener Lista de Archivos Compartidos:} Mediante esta opci\'on, el cliente obtiene la lista de los archivos compartidos por 
 				todos los clientes que se encuentran conectados. La lista muestra los archivos compartidos por cada cliente, de modo que teniendo esta 
 				informaci\'on se puede realizar la \emph{Descarga} de alg\'un archivo.
@@ -230,7 +255,29 @@
 			\end{itemize}
 
 	\subsection{Problemas Conocidos de Concurrencia en el Trabajo}
-	Prrr....
+	Respecto a las transferencias, como se mencion\'o, utilizan Memoria Compartida. Se podr\'ia comparar con el 
+	problema de \emph{Consumidor Productor}, con la excepci\'on de que habr\'ia un solo consumidor y un solo productor. \\
+	Sin embargo, se tienen los mismos problemas que en el modelo, ya que el lector debe esperar a que el escritor
+	 ``produzca'' 
+	y el escritor debe esperar a que el lector ``consuma''.
+	
+	Respecto a la comunicaci\'on entre cliente y servidor, se utiliza una FIFO para que el servidor lea los comandos de 
+	todos los clientes. La comunicaci\'on tambi\'en se parece al problema de \emph{Cosumidor Productor},
+	 con la
+	 excepci\'on de que puede haber muchos productores y un solo consumidor. En el caso de las respuestas del servidor
+	 a cada
+	 cliente, se utiliza una FIFO para cada uno. Aqu\'i, solo hay un productor y un consumidor.\\
+	En este caso, el lector siempre debe esperar a que el escritor ``produzca''.
+
+	Respecto a la lectura del archivo para la transferencia, se podr\'ia comparar con el modelo de \emph{Lectores
+	 Escritores}, aunque en la aplicaci\'on se pueden tener varios lectores para el archivo a transferir
+	y un solo escritor para el archivo nuevo. \\Aunque, an\'alogamente 
+	al caso anterior, se pueden presentar los problemas caracter\'isticos de este modelo, es decir, podr\'ia darse el caso
+	de que se desee modificar de forma externa al archivo de lectura mientras est\'a siendo leido. Para el archivo de 
+	escritura, 
+	podr\'ia ser que se quiera leer o escribir el archivo mientras se est\'a escribiendo. 
+	Para resolver estos problemas, se utilizan
+	 Locks para los archivos en cuesti\'on.
 
 	\subsection{Mecanismos de Concurrencia Utilizados}
 		A continuaci\'on se exhiben los mecanismos de concurrencia utilizados en la comunicaci\'on entre los procesos:

@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "logger.h"
+
 typedef enum {LECTURA, ESCRITURA} TMODO;
 
 

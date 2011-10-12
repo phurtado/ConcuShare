@@ -8,7 +8,7 @@
 #include "fifo.h"
 #include "Semaforo.h"
 #include "parsercomandos.h"
-using namespace std;
+
 
 class Cliente{
     private:
@@ -18,9 +18,9 @@ class Cliente{
         bool estaConectado;
 		std::list<TPID> *listaHijos; ///< Lista de procesos hijos del proceso cliente
 		
-        string crearNombreDestino(string &sharePath, string &destPath);
-		int crearHijoReceptor(string &pathOrigen, string &pathDestino, TPID pid);
-		int validarArchivoCompartido(TPID pid, string &pathOrigen, string &pathDestino);
+        std::string crearNombreDestino(std::string &sharePath, std::string &destPath);
+		int crearHijoReceptor(std::string &pathOrigen, std::string &pathDestino, TPID pid);
+		int validarArchivoCompartido(TPID pid, std::string &pathOrigen, std::string &pathDestino);
         
     public:
         /**
@@ -93,7 +93,7 @@ class Cliente{
          * 								-3 si destPath existe previamente
          * 								-4 si pid es el del cliente actual
          */
-        int empezarTransferencia(string destPath, string sharePath, TPID pid);
+        int empezarTransferencia(std::string destPath, std::string sharePath, TPID pid);
         
         /**
          * Lee el fifo de lectura para obtener un mensaje enviado por el servidor

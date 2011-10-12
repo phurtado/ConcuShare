@@ -3,7 +3,6 @@
 #include <iostream>
 #include <stdio.h>
 #include "logger.h"
-#include <sstream>
 
 using namespace std;
 
@@ -76,17 +75,14 @@ int Transferencia::enviar() {
 	int res;
 	char bufferLocal[BUFMEMSIZE];
 	if(! this->archivo->archivoLockeado()) {
-		Logger::instancia() << "Lockeando el archivo " << pathOrigen << " para lectura" << el;
 		this->archivo->tomarLock();
 	}
 	
 	off_t posActual = this->archivo->leer(bufferLocal, BUFMEMSIZE);
 	this->buffer.setDatos(bufferLocal);
-	
 	this->buffer.setTamArchivo(this->longitudArchivo);
 	this->buffer.setTamEscrito(posActual);
 	this->bytesTransferidos += posActual;
-	
 	
 	// bloqueo la escritura hasta que se termine la lectura
 	if((res = this->semaforos->p(SEMESCR)) != 0) {
@@ -105,7 +101,6 @@ int Transferencia::enviar() {
     
 	bool llegueAlFin = this->bytesTransferidos >= this->longitudArchivo;
 	if(llegueAlFin) {
-		Logger::instancia() << "Liberando archivo " << pathOrigen << el;
 		archivo->liberarLock();
 	}
 	return (llegueAlFin) ? 1 : 0;
@@ -116,7 +111,6 @@ int Transferencia::recibir() {
 	stringstream ss;
 	if(! archivo->archivoLockeado()) {
 		archivo->tomarLock();
-		Logger::instancia() << "Lockeando el archivo " << pathDestino << " para escritura" << el;	
 	}
     Logger::instancia() << "Lectura: Bloqueo lectura " << el;
 	
@@ -141,8 +135,7 @@ int Transferencia::recibir() {
     b.getTamArchivo() << ", transferidos: " << this->bytesTransferidos << el;
     
     bool archivoCompleto = this->bytesTransferidos >= b.getTamArchivo();
-    if(archivoCompleto) {	
-		Logger::instancia() << "Liberando el archivo " << pathDestino << el;
+    if(archivoCompleto) {
 		archivo->liberarLock();
 	}
 	return (archivoCompleto) ? 1 : 0;
@@ -153,6 +146,8 @@ Transferencia::~Transferencia() {
 	this->memoriaCompartida->liberar();
 	delete this->memoriaCompartida;
 	
+	// si es necesario, se bloquea la escritura 
+	// hasta que la ultima lectura termine
 	this->semaforos->p(SEMESCR);
 	this->semaforos->eliminar();
 	delete this->semaforos;

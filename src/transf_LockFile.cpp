@@ -8,10 +8,12 @@ LockFile :: LockFile ( const char* nombre, TMODO modo ) {
 		case LECTURA:
 			this->fd = open ( this->nombre,O_RDONLY ); 
 			this->tipoLock = F_RDLCK;
+			Logger::instancia() << "Creando LockFile para lectura " << this->nombre << el;
 			break;
 		case ESCRITURA:
 			this->fd = open ( this->nombre,O_CREAT|O_WRONLY,0777 );
 			this->tipoLock = F_WRLCK;
+			Logger::instancia() << "Creando LockFile para escritura " << this->nombre << el;
 			break;
 	}
 	if(this->fd == -1)
@@ -24,6 +26,7 @@ LockFile :: LockFile ( const char* nombre, TMODO modo ) {
 }
 
 int LockFile :: tomarLock () {
+	Logger::instancia() << "Tomando Lock para " << this->nombre << el;
 	this->fl.l_type = this->tipoLock;
 	int resultado = fcntl ( this->fd,F_SETLKW,&(this->fl) );
 	this->lockActivo = true;
@@ -32,6 +35,7 @@ int LockFile :: tomarLock () {
 
 
 int LockFile :: liberarLock () {
+	Logger::instancia() << "Liberando LockFile para " << this->nombre << el;
 	this->fl.l_type = F_UNLCK;
 	int resultado = fcntl ( this->fd,F_SETLK,&(this->fl) );
 	this->lockActivo = false;

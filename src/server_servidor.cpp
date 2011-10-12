@@ -2,6 +2,8 @@
 #include <sstream>
 #include "logger.h"
 
+using namespace std;
+
 Servidor::Servidor() {
 	this->fifoLectura = new Fifo(NOMBREFIFOSERVIDOR);
 	this->fifosEscritura = new map< TPID, Fifo*>();
@@ -220,10 +222,8 @@ Servidor::~Servidor() {
 	// espero por hijos que no terminaron todavia
 	list<TPID>::iterator itP = this->listaHijos->begin();
 	for(; itP != this->listaHijos->end(); itP++) {
-		cout << "Esperando por " << *itP << endl;
 		Logger::instancia() << "Esperando por " << *itP << el;
 		waitpid(*itP, NULL, 0);
-		cout << "Listo" << endl;
 		Logger::instancia() << "Listo" << el;
 	}
 	

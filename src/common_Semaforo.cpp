@@ -53,7 +53,9 @@ int Semaforo::p (int numSem) {
 	operacion.sem_op  = -1;	// restar 1 al semaforo
 	operacion.sem_flg = 0;
 	int resultado = semop ( this->id,&operacion,1 );
-	Logger::instancia() << "Restando 1 al semaforo id: " << this->id << ", Resultado: " << resultado << el;
+	Logger::instancia() << "Restando 1 al semaforo id: " << this->id << 
+	", Resultado: " << resultado << ", valor semaforo: " << 
+	getValor(numSem) << el;
 	return resultado;
 }
 
@@ -63,7 +65,9 @@ int Semaforo::v (int numSem) {
 	operacion.sem_op  = 1;	// sumar 1 al semaforo
 	operacion.sem_flg = 0;
 	int resultado = semop ( this->id,&operacion,1 );
-	Logger::instancia() << "Sumando 1 al semaforo id: " << this->id << ", Resultado: " << resultado << el;
+	Logger::instancia() << "Sumando 1 al semaforo id: " << this->id << 
+	", Resultado: " << resultado << ", valor semaforo: " << 
+	getValor(numSem) << el;
 	return resultado;
 }
 

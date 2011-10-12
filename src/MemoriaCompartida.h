@@ -11,6 +11,7 @@
 #include	<sys/shm.h>
 #include <stdlib.h>
 
+#include "logger.h"
 
 template <class T> class MemoriaCompartida {
 
@@ -53,11 +54,12 @@ template <class T> int MemoriaCompartida<T> :: crear (const char *archivo,char l
 		else {
 			// attach del bloque de memoria al espacio de direcciones del proceso
 			void* ptrTemporal = shmat ( this->shmId, NULL, 0 );
-
+			
 			if ( ptrTemporal == (void *) -1 ) {
 				return ERROR_SHMAT;
 			} else {
 				this->ptrDatos = (T *) ptrTemporal;
+				Logger::instancia() << "Creando memoria compartida " << this->shmId << el;
 				return SHM_OK;
 			}
 		}
@@ -68,19 +70,24 @@ template <class T> int MemoriaCompartida<T> :: crear (const char *archivo,char l
 template <class T> void MemoriaCompartida<T> :: liberar () {
 	// detach del bloque de memoria
 	shmdt ( (void *) this->ptrDatos );
-
+	
 	int procAdosados = this->cantidadProcesosAdosados ();
-
+	
 	if ( procAdosados == 0 ) {
 		shmctl ( this->shmId,IPC_RMID,NULL );
 	}
+	Logger::instancia() << "Liberando memoria compartida " << this->shmId << 
+	". Procesos adosados: " << procAdosados << el;
+	
 }
 
 template <class T> void MemoriaCompartida<T> :: escribir ( T &dato ) {
+	Logger::instancia() << "Escribiendo memoria compartida " << this->shmId << el;
 	* (this->ptrDatos) = dato;
 }
 
 template <class T> T MemoriaCompartida<T> :: leer () {
+	Logger::instancia() << "Leyendo memoria compartida " << this->shmId << el;
 	return ( *(this->ptrDatos) );
 }
 

@@ -89,7 +89,7 @@ void descargarArchivo() {
 		return;
 	}
 	if(! S_ISREG(buf.st_mode)) {
-		cout << "El path del archiv compartido debe ser un archivo regular" << endl;
+		cout << "El path del archivo compartido debe ser un archivo regular" << endl;
 		return;
 	}
 
