@@ -255,18 +255,18 @@
 			\end{itemize}
 
 	\subsection{Problemas Conocidos de Concurrencia en el Trabajo}
-	Respecto a las transferencias, como se mencion\'o, utilizan Memoria Compartida. Se podr\'ia comparar con el 
+	Respecto a las transferencias, se podr\'ia comparar con el 
 	problema de \emph{Consumidor Productor}, con la excepci\'on de que habr\'ia un solo consumidor y un solo productor. \\
 	Sin embargo, se tienen los mismos problemas que en el modelo, ya que el lector debe esperar a que el escritor
 	 ``produzca'' 
 	y el escritor debe esperar a que el lector ``consuma''.
 	
-	Respecto a la comunicaci\'on entre cliente y servidor, se utiliza una FIFO para que el servidor lea los comandos de 
-	todos los clientes. La comunicaci\'on tambi\'en se parece al problema de \emph{Cosumidor Productor},
+	Respecto a la comunicaci\'on entre cliente y servidor, la comunicaci\'on tambi\'en se parece al problema de \emph
+	{Cosumidor Productor},
 	 con la
 	 excepci\'on de que puede haber muchos productores y un solo consumidor. En el caso de las respuestas del servidor
 	 a cada
-	 cliente, se utiliza una FIFO para cada uno. Aqu\'i, solo hay un productor y un consumidor.\\
+	 cliente, solo hay un productor y un consumidor.\\
 	En este caso, el lector siempre debe esperar a que el escritor ``produzca''.
 
 	Respecto a la lectura del archivo para la transferencia, se podr\'ia comparar con el modelo de \emph{Lectores
@@ -275,9 +275,7 @@
 	al caso anterior, se pueden presentar los problemas caracter\'isticos de este modelo, es decir, podr\'ia darse el caso
 	de que se desee modificar de forma externa al archivo de lectura mientras est\'a siendo leido. Para el archivo de 
 	escritura, 
-	podr\'ia ser que se quiera leer o escribir el archivo mientras se est\'a escribiendo. 
-	Para resolver estos problemas, se utilizan
-	 Locks para los archivos en cuesti\'on.
+	podr\'ia ser que se quiera leer o escribir el archivo mientras se est\'a escribiendo.
 
 	\subsection{Mecanismos de Concurrencia Utilizados}
 		A continuaci\'on se exhiben los mecanismos de concurrencia utilizados en la comunicaci\'on entre los procesos:
